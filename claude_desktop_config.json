@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "railbus-passenger": {
+      "command": "/Users/bharathparameshwara/Desktop/railbus-backend/.venv/bin/python",
+      "args": [
+        "/Users/bharathparameshwara/Desktop/railbus-backend/mcp_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/Users/bharathparameshwara/Desktop/railbus-backend"
+      }
+    }
+  }
+}
