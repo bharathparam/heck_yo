@@ -1,0 +1,146 @@
+{
+  "registry_version": "1.0",
+  "active_pipeline_version": "v1.1.0",
+  "data_source": "SYNTHETIC",
+  "updated_at": "2026-10-30T18:06:03.585200Z",
+  "models": {
+    "Model_01": {
+      "model_id": "Model_01",
+      "name": "Train-wise Passenger Arrival Estimation",
+      "version": "v1.1.0",
+      "data_source": "SYNTHETIC",
+      "promotion_gate_decision": "REJECTED_BELOW_BASELINE",
+      "served_by": "BASELINE_POISSON_GLM",
+      "is_baseline": true,
+      "candidate_metrics": {
+        "mae": 30.68,
+        "rmse": 39.19,
+        "wape_pct": 23.1
+      },
+      "baseline_metrics": {
+        "naive_mean": {
+          "mae": 29.72,
+          "rmse": 38.87,
+          "wape_pct": 22.4
+        },
+        "poisson_glm": {
+          "mae": 29.73,
+          "rmse": 37.71,
+          "wape_pct": 22.4
+        },
+        "best_baseline_wape": 22.4,
+        "interval_coverage_80pct": 57.2
+      },
+      "gate_notes": "Candidate XGBoost (WAPE 23.1%) failed to beat Poisson GLM baseline (WAPE 22.4%) by stated margin (>= 0.5%). Promotion Gate rejected candidate; serving Poisson Count GLM baseline in production.",
+      "artifacts": {
+        "serving_artifact": "model_01_arrival.joblib"
+      },
+      "registered_at": "2026-10-30T18:05:59.045885Z"
+    },
+    "Model_02": {
+      "model_id": "Model_02",
+      "name": "Destination-wise Passenger Distribution",
+      "version": "v1.1.0",
+      "data_source": "SYNTHETIC",
+      "promotion_gate_decision": "PROMOTED_ACTIVE",
+      "served_by": "EMPIRICAL_DESTINATION_DISTRIBUTION",
+      "is_baseline": false,
+      "candidate_metrics": {
+        "distribution_shares": {
+          "Bengaluru": 56.2,
+          "Chamarajanagar": 3.2,
+          "Hassan": 13.2,
+          "Mandya": 17.4,
+          "Nanjangud": 0.4,
+          "Other": 9.6
+        }
+      },
+      "baseline_metrics": {
+        "uniform_shares": 16.7
+      },
+      "gate_notes": "Conditioned destination shares capture significant origin-station variance.",
+      "artifacts": {
+        "serving_artifact": "model_02_destination.joblib"
+      },
+      "registered_at": "2026-10-30T18:05:59.124372Z"
+    },
+    "Model_03": {
+      "model_id": "Model_03",
+      "name": "Onward Transportation Demand",
+      "version": "v1.1.0",
+      "data_source": "SYNTHETIC",
+      "promotion_gate_decision": "ACTIVE_PRIOR",
+      "served_by": "BAYESIAN_BETA_PRIOR",
+      "is_baseline": true,
+      "candidate_metrics": {
+        "prior_status": "DOCUMENTED_PRIOR_UNTIL_SURVEY_OBSERVED"
+      },
+      "baseline_metrics": {
+        "average_prior_transit_need_rate_pct": 65.8
+      },
+      "gate_notes": "Serving documented Beta prior until station intercept survey data is observed.",
+      "artifacts": {
+        "serving_artifact": "model_03_transit_demand.joblib"
+      },
+      "registered_at": "2026-10-30T18:05:59.126683Z"
+    },
+    "Model_04": {
+      "model_id": "Model_04",
+      "name": "RailBus Adoption Prediction",
+      "version": "v1.1.0",
+      "data_source": "SYNTHETIC",
+      "promotion_gate_decision": "PROMOTED_ACTIVE",
+      "served_by": "CANDIDATE_XGBOOST",
+      "is_baseline": false,
+      "candidate_metrics": {
+        "overall": {
+          "mae": 0.78,
+          "rmse": 1.23,
+          "wape_pct": 24.9
+        },
+        "per_horizon": {
+          "T_24.0h": {
+            "mae": 1.25,
+            "rmse": 1.79,
+            "wape_pct": 40.2,
+            "coverage_80pct": 86.8,
+            "avg_interval_width": 4.6
+          },
+          "T_6.0h": {
+            "mae": 0.95,
+            "rmse": 1.36,
+            "wape_pct": 30.6,
+            "coverage_80pct": 88.4,
+            "avg_interval_width": 3.4
+          },
+          "T_2.0h": {
+            "mae": 0.63,
+            "rmse": 0.88,
+            "wape_pct": 20.1,
+            "coverage_80pct": 87.4,
+            "avg_interval_width": 1.9
+          },
+          "T_30m": {
+            "mae": 0.27,
+            "rmse": 0.46,
+            "wape_pct": 8.5,
+            "coverage_80pct": 91.2,
+            "avg_interval_width": 0.7
+          }
+        }
+      },
+      "baseline_metrics": {
+        "confirmed_bookings_baseline": {
+          "mae": 1.41,
+          "rmse": 2.61,
+          "wape_pct": 45.1
+        }
+      },
+      "gate_notes": "Candidate XGBoost outperformed confirmed-booking baseline by 20.2% WAPE (>= 0.5% required).",
+      "artifacts": {
+        "serving_artifact": "model_04_adoption.joblib"
+      },
+      "registered_at": "2026-10-30T18:06:03.585193Z"
+    }
+  }
+}

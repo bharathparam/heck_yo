@@ -1,6 +1,7 @@
 /**
- * RailBus Intelligence Engine — Operator Command Center Application
- * Connects frontend dashboard with FastAPI 4-stage pipeline and OR-Tools optimizer.
+ * RailBus SmartSync Module — Honest Operator Command Center Application
+ * Connects frontend dashboard with FastAPI honest 4-stage hierarchy,
+ * OR-Tools supply optimization, backend recommendation transmission, and post-arrival audits.
  */
 
 // Global State
@@ -13,18 +14,9 @@ let cachedPipelineData = null;
 const trainSelect = document.getElementById("train-select");
 const clockDisplay = document.getElementById("clock-display");
 const btnRefresh = document.getElementById("btn-refresh");
-const btnDeployTop = document.getElementById("btn-deploy-top");
-const btnDeployAction = document.getElementById("btn-deploy-action");
-const btnRunSim = document.getElementById("btn-run-sim");
-const btnResetSim = document.getElementById("btn-reset-sim");
-
-// Sliders
-const simDelaySlider = document.getElementById("sim-delay-slider");
-const simBookingSlider = document.getElementById("sim-booking-slider");
-const simSurgeSlider = document.getElementById("sim-surge-slider");
-const valDelayDelta = document.getElementById("val-delay-delta");
-const valBookingMult = document.getElementById("val-booking-mult");
-const valSurgeMult = document.getElementById("val-surge-mult");
+const btnTransmitTop = document.getElementById("btn-transmit-top");
+const btnTransmitAction = document.getElementById("btn-transmit-action");
+const btnRunAudit = document.getElementById("btn-run-audit");
 
 // Clock Updater
 function updateClock() {
@@ -74,31 +66,12 @@ function setupEventListeners() {
     if (currentEventId) loadPipelineData(currentEventId, currentHorizon, currentRisk);
   });
 
-  // Deploy Action
-  btnDeployAction.addEventListener("click", executeDeployment);
-  btnDeployTop.addEventListener("click", executeDeployment);
+  // Transmit Actions (Replaces old deploy)
+  btnTransmitAction.addEventListener("click", executeTransmission);
+  btnTransmitTop.addEventListener("click", executeTransmission);
 
-  // Simulation Sliders
-  simDelaySlider.addEventListener("input", (e) => {
-    valDelayDelta.textContent = `+${e.target.value} mins`;
-  });
-  simBookingSlider.addEventListener("input", (e) => {
-    valBookingMult.textContent = `${e.target.value}x`;
-  });
-  simSurgeSlider.addEventListener("input", (e) => {
-    valSurgeMult.textContent = `${e.target.value}x`;
-  });
-
-  btnRunSim.addEventListener("click", runSimulation);
-  btnResetSim.addEventListener("click", () => {
-    simDelaySlider.value = 0;
-    simBookingSlider.value = 1.0;
-    simSurgeSlider.value = 1.0;
-    valDelayDelta.textContent = "+0 mins";
-    valBookingMult.textContent = "1.0x (Normal)";
-    valSurgeMult.textContent = "1.0x (Standard)";
-    if (currentEventId) loadPipelineData(currentEventId, currentHorizon, currentRisk);
-  });
+  // Post-Arrival Audit
+  btnRunAudit.addEventListener("click", executePostArrivalAudit);
 }
 
 // 1. Fetch Incoming Trains
@@ -113,7 +86,7 @@ async function loadUpcomingTrains() {
       return;
     }
 
-    data.trains.forEach((t, idx) => {
+    data.trains.forEach((t) => {
       const opt = document.createElement("option");
       opt.value = t.event_id;
       const delayText = t.arrival_delay_minutes > 0 ? ` (+${t.arrival_delay_minutes}m)` : " (On-time)";
@@ -129,17 +102,22 @@ async function loadUpcomingTrains() {
   }
 }
 
-// 2. Fetch Full Pipeline Data
+// 2. Fetch Pipeline Data
 async function loadPipelineData(eventId, horizon, risk) {
   try {
     const res = await fetch(`/api/pipeline/${eventId}?horizon=${horizon}&risk=${risk}`);
     const data = await res.json();
     cachedPipelineData = data;
 
+    // Update Data Honesty Badges
+    document.getElementById("badge-source-text").textContent = `DATA SOURCE: ${data.data_source}`;
+    document.getElementById("hero-data-source").textContent = `SOURCE: ${data.data_source}`;
+    document.getElementById("disp-source-tag").textContent = data.data_source;
+    document.getElementById("version-badge").textContent = data.model_version;
+
     renderTrainHero(data.train_info);
-    renderStage1Predict(data.stage_1_predict);
-    renderStage2Plan(data.stage_2_plan);
-    renderStage3Deploy(data.stage_3_deploy);
+    renderStage1Predict(data.predictions);
+    renderStage2Optimization(data.optimization_plan);
   } catch (err) {
     console.error("Failed to fetch pipeline data:", err);
   }
@@ -171,24 +149,27 @@ function renderTrainHero(info) {
   document.getElementById("hero-calendar").textContent = calFlags.join(" • ");
 }
 
-// Render Stage 1: The 4 Distinct Models
-function renderStage1Predict(predict) {
-  const m1 = predict.model_01_arrival_estimation;
-  const m2 = predict.model_02_destination_distribution;
-  const m3 = predict.model_03_transit_demand;
-  const m4 = predict.model_04_railbus_adoption;
+// Render Stage 1: Coherent 4-Stage Hierarchy
+function renderStage1Predict(predictions) {
+  const m1 = predictions.model_01;
+  const m2 = predictions.model_02;
+  const m3 = predictions.model_03;
+  const m4 = predictions.model_04;
 
-  // Model 01
+  // Model 01 (Shows Promotion Gate Decision)
   document.getElementById("m1-alighting-val").textContent = m1.expected_alighting_passengers;
-  document.getElementById("m1-xgb-val").textContent = `${m1.expected_alighting_passengers} pax`;
-  document.getElementById("m1-poisson-val").textContent = `${m1.poisson_baseline_benchmark} pax`;
+  document.getElementById("m1-poisson-val").textContent = `${m1.poisson_baseline_estimate} pax`;
+  document.getElementById("m1-xgb-val").textContent = `${m1.candidate_xgboost_estimate} pax`;
   document.getElementById("m1-interval").textContent = `[${m1.lower_bound_p10} , ${m1.upper_bound_p90}] pax`;
+  document.getElementById("m1-served-badge").textContent = `ACTIVE: ${m1.served_by}`;
+  document.getElementById("m1-gate-reason").textContent = m1.gate_reason;
 
   // Model 02
   const destList = document.getElementById("m2-destination-list");
   destList.innerHTML = "";
   const counts = m2.destination_passenger_counts;
   const shares = m2.destination_shares_pct;
+  document.getElementById("m2-sum-val").textContent = m2.total_accounted_passengers;
 
   Object.keys(counts).forEach(dest => {
     const pax = counts[dest];
@@ -207,156 +188,151 @@ function renderStage1Predict(predict) {
     destList.appendChild(row);
   });
 
-  // Model 03
+  // Model 03 (Shows Documented Beta Prior)
   document.getElementById("m3-transit-val").textContent = m3.total_onward_transit_demand;
   document.getElementById("m3-pct-val").textContent = `${m3.overall_transit_need_rate_pct}%`;
   document.getElementById("m3-local-val").textContent = `${m3.total_private_or_local_passengers} pax`;
   document.getElementById("m3-fill-transit").style.width = `${m3.overall_transit_need_rate_pct}%`;
   document.getElementById("m3-fill-private").style.width = `${100 - m3.overall_transit_need_rate_pct}%`;
-  document.getElementById("m3-note").textContent = m3.interpretation;
 
-  // Model 04
+  // Model 04 & Hierarchy verification values
   document.getElementById("m4-adopted-val").textContent = m4.total_expected_railbus_passengers;
   document.getElementById("m4-rate-val").textContent = `${m4.overall_adoption_rate_pct}% of transit need`;
   document.getElementById("m4-confirmed-val").textContent = `${m4.total_confirmed_bookings} bookings`;
   document.getElementById("m4-range-val").textContent = `[${m4.total_confidence_range[0]} , ${m4.total_confidence_range[1]}] pax`;
+
+  // Hierarchy strip
+  document.getElementById("hier-b").textContent = m4.total_confirmed_bookings;
+  document.getElementById("hier-r").textContent = m4.total_expected_railbus_passengers;
+  document.getElementById("hier-n").textContent = m3.total_onward_transit_demand;
+  document.getElementById("hier-a").textContent = m1.expected_alighting_passengers;
 }
 
-// Render Stage 2: OR-Tools Transport Optimization Plan
-function renderStage2Plan(plan) {
-  const sum = plan.fleet_summary;
-
-  document.getElementById("kpi-demand").textContent = `${sum.total_forecasted_demand} pax`;
-  document.getElementById("kpi-capacity").textContent = `${sum.total_seats_allocated} seats`;
-  document.getElementById("kpi-loadfactor").textContent = `${sum.overall_load_factor_pct}%`;
-  document.getElementById("kpi-vehicles").textContent = `${sum.total_fleet_vehicles} buses`;
-  document.getElementById("kpi-crew").textContent = `${sum.total_crew_assigned} crew`;
-  document.getElementById("kpi-margin").textContent = `₹${sum.projected_net_margin_inr.toLocaleString()}`;
-  document.getElementById("kpi-rev-cost").textContent = `Rev: ₹${sum.projected_ticket_revenue_inr.toLocaleString()} | Cost: ₹${sum.total_operating_cost_inr.toLocaleString()}`;
-
-  // Route Grouping Banner
-  const advContainer = document.getElementById("grouping-advisory-container");
-  const advText = document.getElementById("grouping-advisory-text");
-  if (plan.route_grouping_advisories && plan.route_grouping_advisories.length > 0) {
-    const adv = plan.route_grouping_advisories[0];
-    advText.innerHTML = `<strong>${adv.cluster_name}:</strong> Consolidate low-demand routes (<em>${adv.merged_routes.join(", ")}</em>) into <strong>${adv.recommended_vehicle}</strong>. Saves <strong>₹${adv.savings_inr}</strong> operational dispatch cost! Path: ${adv.description}.`;
-    advContainer.style.display = "flex";
-  } else {
-    advText.textContent = "Point-to-point dedicated shuttles optimal for current passenger volume across all routes.";
-  }
-
-  // Table
-  const tbody = document.getElementById("dispatch-table-body");
+// Render Stage 2: OR-Tools Optimization (Confirmed vs Forecast)
+function renderStage2Optimization(plan) {
+  // A. Confirmed Assignments Table
+  const tbody = document.getElementById("confirmed-table-body");
   tbody.innerHTML = "";
 
-  plan.route_plans.forEach(rp => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><strong>${rp.destination_station}</strong></td>
-      <td>${rp.planning_demand} pax <small class="text-secondary">(conf: ${rp.confirmed_bookings})</small></td>
-      <td><span class="text-cyan font-bold">${rp.vehicles_summary}</span></td>
-      <td>${rp.total_capacity_seats} seats</td>
-      <td><strong>${rp.load_factor_pct}%</strong></td>
-      <td><span class="time-badge">${rp.departure_time}</span></td>
-      <td><span class="badge-bay">${rp.platform_bay}</span></td>
-      <td><span class="badge-status ${rp.status_color}">${rp.status}</span></td>
-      <td><small>${rp.operator_note}</small></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-// Render Stage 3: Deployment Status
-function renderStage3Deploy(deploy) {
-  const badge = document.getElementById("deploy-status-badge");
-  const dispId = document.getElementById("disp-manifest-id");
-  const dispBody = document.getElementById("disp-manifest-body");
-  const stepDeploy = document.getElementById("step-deploy");
-
-  if (deploy.status === "DEPLOYED" && deploy.deployment_record) {
-    const rec = deploy.deployment_record;
-    badge.className = "badge badge-approved";
-    badge.textContent = "Officially Deployed & Locked";
-    stepDeploy.classList.add("active");
-
-    dispId.textContent = `MANIFEST ID: ${rec.manifest_id}`;
-    dispBody.innerHTML = `
-      <div class="manifest-certified">
-        <p><strong>Status:</strong> DISPATCH OFFICIALLY AUTHORIZED</p>
-        <p><strong>Authorized Controller:</strong> ${rec.operator_name}</p>
-        <p><strong>Timestamp:</strong> ${new Date(rec.deployment_timestamp).toLocaleString("en-IN")}</p>
-        <p><strong>Directives:</strong> ${rec.notes || "Standard Operating Procedure"}</p>
-        <table class="manifest-table">
-          <thead><tr><th>Route</th><th>Vehicle</th><th>Bay</th><th>Departure</th></tr></thead>
-          <tbody>
-            ${rec.route_plans.map(r => `<tr><td>${r.destination_station}</td><td>${r.vehicles_summary}</td><td>${r.platform_bay}</td><td>${r.departure_time}</td></tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
+  const assignments = plan.confirmed_assignment_recommendations || [];
+  if (assignments.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center">No active trips found in backend.</td></tr>`;
   } else {
-    badge.className = "badge badge-pending";
-    badge.textContent = "Ready for Deployment";
-    stepDeploy.classList.remove("active");
-    dispId.textContent = "MANIFEST: NOT YET ISSUED";
-    dispBody.innerHTML = `<p class="placeholder-text">Click "Confirm & Issue Dispatch Manifest" to lock in fleet schedules and generate the verified digital manifest.</p>`;
-  }
-}
+    assignments.forEach(c => {
+      const tr = document.createElement("tr");
+      const isMet = c.confirmed_bookings >= 20;
+      const statusBadge = isMet
+        ? `<span class="badge-met">ELIGIBLE (≥20)</span>`
+        : `<span class="badge-unmet">INELIGIBLE (${c.confirmed_bookings}/20)</span>`;
 
-// Execute Deployment Action
-async function executeDeployment() {
-  if (!currentEventId) return;
-  const operatorName = document.getElementById("operator-name-input").value.trim() || "Chief Dispatcher";
-  const notes = document.getElementById("operator-notes-input").value.trim();
-
-  try {
-    const res = await fetch("/api/deploy", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        event_id: currentEventId,
-        operator_name: operatorName,
-        notes: notes
-      })
+      tr.innerHTML = `
+        <td><strong>${c.trip_id ? c.trip_id.slice(0, 8) + '...' : 'Trip'}</strong><br><small class="text-secondary">${c.route_name}</small></td>
+        <td>${c.destination}</td>
+        <td><strong>${c.confirmed_bookings} pax</strong></td>
+        <td>${statusBadge}</td>
+        <td>${c.bus_registration ? `<strong class="text-cyan">${c.bus_registration}</strong><br><small class="text-muted">${c.bus_model}</small>` : '<span class="text-muted">—</span>'}</td>
+        <td>${c.bus_capacity ? `${c.bus_capacity} seats` : '<span class="text-muted">—</span>'}</td>
+        <td>${c.conductor_name ? `<strong class="text-emerald">${c.conductor_name}</strong>` : '<span class="text-muted">—</span>'}</td>
+        <td>${c.departure_time || '—'}</td>
+        <td><small>${c.reason || c.recommendation_status}</small></td>
+      `;
+      tbody.appendChild(tr);
     });
-    const result = await res.json();
-    if (result.status === "success") {
-      await loadPipelineData(currentEventId, currentHorizon, currentRisk);
-      alert(`Manifest ${result.manifest.manifest_id} officially authorized and dispatched!`);
-    }
-  } catch (err) {
-    console.error("Failed to deploy manifest:", err);
-    alert("Error deploying manifest: " + err.message);
+  }
+
+  // B. Forecast Pre-Positioning Proposals
+  const propContainer = document.getElementById("proposals-container");
+  propContainer.innerHTML = "";
+
+  const proposals = plan.forecast_prepositioning_proposals || [];
+  if (proposals.length === 0) {
+    propContainer.innerHTML = `<p class="placeholder-text">No pre-positioning needed. Current confirmed bookings match anticipated volume.</p>`;
+  } else {
+    proposals.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "proposal-card";
+      card.innerHTML = `
+        <div class="proposal-header">
+          <span class="proposal-dest">${p.destination} Corridor</span>
+          <span class="proposal-badge">${p.status}</span>
+        </div>
+        <div class="proposal-stats">
+          <span>Predicted Demand: <strong>${p.forecasted_passengers} pax</strong></span>
+          <span>Confirmed: <strong>${p.current_confirmed_bookings} pax</strong></span>
+          <span>Threshold Gap: <strong>${p.threshold_gap} pax</strong></span>
+        </div>
+        <div class="proposal-action">
+          <strong>Advisory Proposal:</strong> ${p.recommended_preposition_action}
+        </div>
+      `;
+      propContainer.appendChild(card);
+    });
   }
 }
 
-// Run Simulation Lab
-async function runSimulation() {
+// Transmit Recommendations to Backend API
+async function executeTransmission() {
   if (!currentEventId) return;
-  const delayDelta = parseInt(simDelaySlider.value);
-  const bookingMult = parseFloat(simBookingSlider.value);
-  const surgeMult = parseFloat(simSurgeSlider.value);
+  const statusBadge = document.getElementById("transmit-status-badge");
+  const dispId = document.getElementById("disp-trans-id");
+  const dispBody = document.getElementById("disp-trans-body");
+
+  statusBadge.className = "badge badge-pending";
+  statusBadge.textContent = "Transmitting to Backend...";
 
   try {
-    const res = await fetch("/api/simulate", {
+    const res = await fetch("/api/recommendations/transmit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         event_id: currentEventId,
-        delay_minutes_delta: delayDelta,
-        booking_growth_multiplier: bookingMult,
-        festival_surge_multiplier: surgeMult,
+        snapshot_horizon: currentHorizon,
         risk_tolerance: currentRisk
       })
     });
-    const data = await res.json();
+    const result = await res.json();
 
-    document.getElementById("sim-res-alight").textContent = `${data.stage_1_predict.model_01.expected_alighting_passengers} pax`;
-    document.getElementById("sim-res-transit").textContent = `${data.stage_1_predict.model_03.total_onward_transit_demand} pax`;
-    document.getElementById("sim-res-adoption").textContent = `${data.stage_1_predict.model_04.total_expected_railbus_passengers} pax`;
-    document.getElementById("sim-res-fleet").textContent = `${data.stage_2_plan.fleet_summary.total_seats_allocated} seats`;
-    document.getElementById("sim-res-lf").textContent = `${data.stage_2_plan.fleet_summary.overall_load_factor_pct}%`;
+    statusBadge.className = "badge badge-approved";
+    statusBadge.textContent = "Transmitted & Awaiting Approval";
+
+    dispId.textContent = "ENDPOINT: /api/v1/smartsync/recommendations";
+    dispBody.innerHTML = `
+      <div class="manifest-certified">
+        <p><strong>Status:</strong> ${result.transmission_status}</p>
+        <p><strong>Backend Message:</strong> ${result.backend_response ? result.backend_response.message : 'Recommendations buffered.'}</p>
+        <p><strong>Confirmed Assignments Proposed:</strong> ${result.recommendation_summary.recommended_assignments_count}</p>
+        <p><strong>Forecast Pre-Positioning Proposals:</strong> ${result.recommendation_summary.proposals_count}</p>
+        <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.75rem;">
+          Mandate Enforced: SmartSync does not mutate trips directly. The transit controller in the RailBus Backend must approve assignments via <code>POST /api/v1/smartsync/recommendations/{id}/approve</code>.
+        </p>
+      </div>
+    `;
   } catch (err) {
-    console.error("Simulation failed:", err);
+    console.error("Transmission failed:", err);
+    statusBadge.className = "badge badge-unmet";
+    statusBadge.textContent = "Transmission Failed";
+    dispBody.innerHTML = `<p style="color: #f87171;">Error: ${err.message}</p>`;
+  }
+}
+
+// Execute Post-Arrival Audit
+async function executePostArrivalAudit() {
+  if (!currentEventId) return;
+  try {
+    const res = await fetch("/api/audit/post-arrival", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event_id: currentEventId })
+    });
+    const data = await res.json();
+    const a1 = data.model_01_audit;
+
+    document.getElementById("audit-m1-pred").textContent = `${a1.predicted_alighting} pax (${a1.served_by})`;
+    document.getElementById("audit-m1-actual").textContent = `${a1.actual_alighting} pax`;
+    document.getElementById("audit-m1-error").textContent = `${a1.absolute_error} pax (${a1.percentage_error}%)`;
+    document.getElementById("audit-m1-interval").textContent = a1.within_80pct_interval ? "YES (Within 80% CI)" : "NO (Outside 80% CI)";
+    document.getElementById("audit-m1-interval").style.color = a1.within_80pct_interval ? "var(--accent-emerald)" : "var(--accent-amber)";
+  } catch (err) {
+    console.error("Audit failed:", err);
   }
 }

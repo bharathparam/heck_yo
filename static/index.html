@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RailBus Intelligence Engine — Operator Command Center</title>
+  <title>RailBus SmartSync — Demand Intelligence & Supply Recommendation Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -19,39 +19,24 @@
     <div class="nav-brand">
       <div class="brand-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="4"></rect>
-          <path d="M7 15h10M7 9h10M9 19l-2 2M15 19l2 2"></path>
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 6v6l4 2"></path>
         </svg>
       </div>
       <div>
-        <h1 class="brand-title">RailBus Intelligence Engine</h1>
-        <p class="brand-subtitle">Mysuru Junction (MYS) • Hub Dispatch Control</p>
+        <h1 class="brand-title">RailBus SmartSync Module</h1>
+        <p class="brand-subtitle">Mysuru Junction (MYS) • Advisory Optimization Engine</p>
       </div>
     </div>
 
-    <!-- Live Architecture Pipeline Indicator -->
-    <div class="pipeline-stepper">
-      <div class="step active" id="step-predict">
-        <span class="step-num">1</span>
-        <span class="step-text">PREDICT</span>
-      </div>
-      <div class="step-arrow">→</div>
-      <div class="step active" id="step-plan">
-        <span class="step-num">2</span>
-        <span class="step-text">PLAN</span>
-      </div>
-      <div class="step-arrow">→</div>
-      <div class="step" id="step-deploy">
-        <span class="step-num">3</span>
-        <span class="step-text">DEPLOY</span>
-      </div>
-    </div>
-
+    <!-- Data Honesty & Version Badges (Dynamically Populated from API) -->
     <div class="nav-status">
-      <div class="status-pill">
-        <span class="pulse-dot"></span>
-        <span>4 Models Active • OR-Tools Online</span>
+      <div class="data-source-badge" id="data-source-badge">
+        <span class="pulse-dot-amber"></span>
+        <span id="badge-source-text">DATA SOURCE: SYNTHETIC</span>
       </div>
+      <div class="version-badge" id="version-badge">v1.1.0</div>
+      <div class="advisory-pill">ADVISORY ONLY • NEVER DISPATCHES</div>
       <div class="time-display" id="clock-display">--:--:-- IST</div>
     </div>
   </header>
@@ -73,28 +58,28 @@
         <div class="segmented-control" id="horizon-selector">
           <button type="button" class="segment-btn" data-horizon="24.0">T-24h <small>Plan</small></button>
           <button type="button" class="segment-btn" data-horizon="6.0">T-6h <small>Lock</small></button>
-          <button type="button" class="segment-btn active" data-horizon="2.0">T-2h <small>Crew</small></button>
-          <button type="button" class="segment-btn" data-horizon="0.5">T-0.5h <small>Board</small></button>
+          <button type="button" class="segment-btn active" data-horizon="2.0">T-2h <small>Roster</small></button>
+          <button type="button" class="segment-btn" data-horizon="0.5">T-30m <small>Board</small></button>
         </div>
       </div>
 
       <div class="toolbar-group risk-group">
-        <label>Optimization Risk Strategy</label>
+        <label>Supply Strategy</label>
         <div class="segmented-control" id="risk-selector">
-          <button type="button" class="segment-btn" data-risk="lean">Lean (P50)</button>
+          <button type="button" class="segment-btn" data-risk="lean">Lean</button>
           <button type="button" class="segment-btn active" data-risk="balanced">Balanced</button>
-          <button type="button" class="segment-btn" data-risk="conservative">Conservative (P90)</button>
+          <button type="button" class="segment-btn" data-risk="conservative">Conservative</button>
         </div>
       </div>
 
       <div class="toolbar-actions">
         <button id="btn-refresh" class="btn btn-secondary">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
-          Refresh AI
+          Re-evaluate
         </button>
-        <button id="btn-deploy-top" class="btn btn-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"></path></svg>
-          Deploy Manifest
+        <button id="btn-transmit-top" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+          Transmit Recommendations
         </button>
       </div>
     </section>
@@ -102,9 +87,12 @@
     <!-- Train Profile Banner -->
     <section class="train-hero glass-panel" id="train-hero">
       <div class="train-hero-meta">
-        <span class="badge badge-train" id="hero-train-id">TRAIN --</span>
+        <div class="hero-badges">
+          <span class="badge badge-train" id="hero-train-id">TRAIN --</span>
+          <span class="badge badge-source-inline" id="hero-data-source">SOURCE: SYNTHETIC</span>
+        </div>
         <h2 id="hero-train-name">Loading train profile...</h2>
-        <p class="hero-origin" id="hero-route">Origin: -- → Mysuru Junction (MYS)</p>
+        <p class="hero-origin" id="hero-route">Origin: -- → Mysuru Junction (MYS) • Type: --</p>
       </div>
       <div class="train-hero-stats">
         <div class="hero-stat-card">
@@ -112,7 +100,7 @@
           <span class="stat-val" id="hero-sched-arrival">--:--</span>
         </div>
         <div class="hero-stat-card">
-          <span class="stat-lbl">Live Delay Status</span>
+          <span class="stat-lbl">Arrival Delay</span>
           <span class="stat-val" id="hero-delay-status">-- mins</span>
         </div>
         <div class="hero-stat-card">
@@ -126,36 +114,52 @@
       </div>
     </section>
 
+    <!-- Censoring Awareness Notice Banner -->
+    <section class="censoring-banner glass-panel">
+      <div class="censoring-icon">⚠️</div>
+      <div class="censoring-content">
+        <h4>Data Honesty & Demand Censoring Notice</h4>
+        <p id="censoring-note-text">
+          Confirmed bookings only capture passengers with smartphone app access for scheduled trips. Latent demand from non-app travelers, walk-ins, and unscheduled windows is censored. Pre-registration interest signals are engineered to mitigate downward bias, but field survey calibration is required.
+        </p>
+      </div>
+    </section>
+
     <!-- ============================================================ -->
-    <!-- STAGE 1: PREDICT (THE 4 DISTINCT RAILBUS MODELS) -->
+    <!-- STAGE 1: COHERENT 4-STAGE DEMAND HIERARCHY -->
     <!-- ============================================================ -->
     <section class="stage-section">
       <div class="section-header">
-        <div class="stage-pill pill-predict">STAGE 1: PREDICT</div>
-        <h3>Four Distinct Predictions Required for RailBus</h3>
-        <p class="section-desc">Independent target modeling — never combined into a single prediction</p>
+        <div class="stage-pill pill-predict">STAGE 1: DEMAND INFERENCE</div>
+        <h3>Coherent 4-Stage Demand Hierarchy</h3>
+        <p class="section-desc">Strict physical transit constraint: Confirmed Bookings ≤ RailBus Adoption ≤ Transit Need ≤ Destination Pax ≤ Alighting</p>
       </div>
 
       <div class="grid-4-models">
         <!-- Model 01 Card -->
         <div class="model-card glass-panel" id="card-model-01">
-          <div class="card-badge">MODEL 01</div>
-          <h4 class="model-title">Train-wise Passenger Arrival Estimation</h4>
-          <p class="model-question">How many passengers will get down at Mysuru from this train?</p>
+          <div class="card-badge" id="m1-served-badge">BASELINE: POISSON GLM</div>
+          <h4 class="model-title">Model 01: Train-wise Alighting Estimation</h4>
+          <p class="model-question">How many passengers get down at Mysuru from this train?</p>
           
           <div class="big-metric-container">
             <div class="big-metric-val" id="m1-alighting-val">--</div>
-            <div class="big-metric-unit">passengers</div>
+            <div class="big-metric-unit">alighting pax</div>
+          </div>
+
+          <div class="promotion-gate-box rejected" id="m1-gate-box">
+            <div class="gate-title">PROMOTION GATE: CANDIDATE REJECTED</div>
+            <p id="m1-gate-reason">XGBoost (WAPE 23.1%) failed to beat Poisson GLM baseline (WAPE 22.4%). Poisson Count GLM baseline served in production.</p>
           </div>
 
           <div class="benchmark-comparison">
             <div class="bench-row">
-              <span class="bench-label">XGBoost Regressor:</span>
-              <span class="bench-val primary" id="m1-xgb-val">-- pax</span>
+              <span class="bench-label">Active Model (Poisson GLM Baseline):</span>
+              <strong class="bench-val primary" id="m1-poisson-val">-- pax</strong>
             </div>
             <div class="bench-row">
-              <span class="bench-label">Count GLM (Poisson Baseline):</span>
-              <span class="bench-val" id="m1-poisson-val">-- pax</span>
+              <span class="bench-label">Candidate Model (XGBoost Regressor):</span>
+              <span class="bench-val" id="m1-xgb-val">-- pax</span>
             </div>
           </div>
 
@@ -167,26 +171,25 @@
 
         <!-- Model 02 Card -->
         <div class="model-card glass-panel" id="card-model-02">
-          <div class="card-badge">MODEL 02</div>
-          <h4 class="model-title">Destination-wise Passenger Distribution</h4>
-          <p class="model-question">Where will those passengers go after arriving at Mysuru?</p>
+          <div class="card-badge">ACTIVE: REGIONAL PRIOR</div>
+          <h4 class="model-title">Model 02: Destination Distribution</h4>
+          <p class="model-question">Where will those passengers travel after arriving?</p>
           
           <div class="destination-bars" id="m2-destination-list">
-            <div class="skeleton-line"></div>
             <div class="skeleton-line"></div>
             <div class="skeleton-line"></div>
           </div>
 
           <div class="distribution-footer">
-            <small>Sum equals 100% of Model 01 alighting passengers</small>
+            <small>Partition constraint: Exactly sums to Model 01 alighting count (<span id="m2-sum-val">--</span> pax)</small>
           </div>
         </div>
 
         <!-- Model 03 Card -->
         <div class="model-card glass-panel" id="card-model-03">
-          <div class="card-badge">MODEL 03</div>
-          <h4 class="model-title">Onward Transportation Demand</h4>
-          <p class="model-question">How many passengers need onward transportation?</p>
+          <div class="card-badge warning">DOCUMENTED BETA PRIOR</div>
+          <h4 class="model-title">Model 03: Onward Transportation Need</h4>
+          <p class="model-question">How many passengers require onward commercial transit?</p>
           
           <div class="big-metric-container">
             <div class="big-metric-val highlight-amber" id="m3-transit-val">--</div>
@@ -194,28 +197,28 @@
           </div>
 
           <div class="transit-split-bar">
-            <div class="split-fill transit-fill" id="m3-fill-transit" style="width: 63%;"></div>
-            <div class="split-fill private-fill" id="m3-fill-private" style="width: 37%;"></div>
+            <div class="split-fill transit-fill" id="m3-fill-transit" style="width: 65%;"></div>
+            <div class="split-fill private-fill" id="m3-fill-private" style="width: 35%;"></div>
           </div>
           <div class="split-legend">
-            <span><i class="dot amber"></i> Commercial Transit: <strong id="m3-pct-val">--%</strong></span>
+            <span><i class="dot amber"></i> Transit Need: <strong id="m3-pct-val">--%</strong></span>
             <span><i class="dot slate"></i> Local / Pickup: <strong id="m3-local-val">-- pax</strong></span>
           </div>
 
-          <div class="note-box" id="m3-note">
-            Calculated irrespective of whether they use RailBus or other modes.
+          <div class="note-box warning">
+            <strong>DOCUMENTED PRIOR:</strong> Beta prior distribution calibrated on intercity distance until station intercept survey data is observed.
           </div>
         </div>
 
         <!-- Model 04 Card -->
         <div class="model-card glass-panel" id="card-model-04">
-          <div class="card-badge">MODEL 04</div>
-          <h4 class="model-title">RailBus Adoption Prediction</h4>
-          <p class="model-question">How many passengers are likely to choose RailBus?</p>
+          <div class="card-badge success">PROMOTED ACTIVE: XGBOOST</div>
+          <h4 class="model-title">Model 04: RailBus Adoption Prediction</h4>
+          <p class="model-question">How many passengers are expected to choose RailBus?</p>
           
           <div class="big-metric-container">
             <div class="big-metric-val highlight-emerald" id="m4-adopted-val">--</div>
-            <div class="big-metric-unit">RailBus customers</div>
+            <div class="big-metric-unit">expected customers</div>
           </div>
 
           <div class="adoption-stats">
@@ -224,207 +227,171 @@
               <strong class="text-emerald" id="m4-rate-val">--% of transit need</strong>
             </div>
             <div class="adopt-row">
-              <span>Confirmed Pre-Bookings:</span>
+              <span>Confirmed App Bookings:</span>
               <strong id="m4-confirmed-val">-- bookings</strong>
             </div>
             <div class="adopt-row">
-              <span>Adoption Confidence Range:</span>
+              <span>Adoption 80% CI:</span>
               <strong id="m4-range-val">[-- , --] pax</strong>
             </div>
           </div>
 
           <div class="note-box success">
-            Feeds directly into OR-Tools Transport Optimization Engine below.
+            Hierarchy Verified: Confirmed (<span id="hier-b">--</span>) ≤ Adoption (<span id="hier-r">--</span>) ≤ Need (<span id="hier-n">--</span>) ≤ Alighting (<span id="hier-a">--</span>)
           </div>
         </div>
       </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- STAGE 2: PLAN (OR-TOOLS TRANSPORT OPTIMIZATION ENGINE) -->
+    <!-- STAGE 2: OR-TOOLS SUPPLY ALLOCATION (CONFIRMED VS FORECAST) -->
     <!-- ============================================================ -->
     <section class="stage-section">
       <div class="section-header">
-        <div class="stage-pill pill-plan">STAGE 2: PLAN</div>
-        <h3>Transport Optimization Engine (Google OR-Tools MILP)</h3>
-        <p class="section-desc">Vehicle capacity allocation • Route grouping • Timing & platform availability • Crew assignment</p>
+        <div class="stage-pill pill-plan">STAGE 2: SUPPLY OPTIMIZATION</div>
+        <h3>Backend-Integrated Fleet Optimization (Google OR-Tools)</h3>
+        <p class="section-desc">Single source of truth from Backend API • Shared fleet & conductor overlap constraints • 20-confirmed-booking activation threshold</p>
       </div>
 
-      <!-- Fleet KPI Strip -->
-      <div class="fleet-kpi-grid">
-        <div class="kpi-card glass-panel">
-          <span class="kpi-label">Total RailBus Demand</span>
-          <div class="kpi-num" id="kpi-demand">--</div>
-          <span class="kpi-sub">Passengers predicted</span>
+      <!-- Section A: Confirmed Assignment Recommendations -->
+      <div class="optimization-block glass-panel">
+        <div class="block-header">
+          <div class="badge-threshold-rule">STRICT RULE: ASSIGNMENT REQUIRES ≥ 20 CONFIRMED BOOKINGS</div>
+          <h4>Confirmed Fleet Assignment Recommendations</h4>
+          <p class="block-desc">Evaluated over active backend trips, buses, and available conductors. Trips with &lt; 20 bookings are ineligible for assignment.</p>
         </div>
-        <div class="kpi-card glass-panel">
-          <span class="kpi-label">Total Fleet Capacity</span>
-          <div class="kpi-num highlight-cyan" id="kpi-capacity">--</div>
-          <span class="kpi-sub">Allocated seats</span>
-        </div>
-        <div class="kpi-card glass-panel">
-          <span class="kpi-label">Projected Load Factor</span>
-          <div class="kpi-num highlight-emerald" id="kpi-loadfactor">--%</div>
-          <span class="kpi-sub">Efficiency target: 70-90%</span>
-        </div>
-        <div class="kpi-card glass-panel">
-          <span class="kpi-label">Fleet Vehicles Assigned</span>
-          <div class="kpi-num" id="kpi-vehicles">--</div>
-          <span class="kpi-sub" id="kpi-fleet-mix">Mini / Std / Express</span>
-        </div>
-        <div class="kpi-card glass-panel">
-          <span class="kpi-label">Assigned Crew</span>
-          <div class="kpi-num" id="kpi-crew">--</div>
-          <span class="kpi-sub">Drivers & Conductors</span>
-        </div>
-        <div class="kpi-card glass-panel">
-          <span class="kpi-label">Est. Net Trip Margin</span>
-          <div class="kpi-num highlight-violet" id="kpi-margin">₹--</div>
-          <span class="kpi-sub" id="kpi-rev-cost">Rev: ₹-- | Cost: ₹--</span>
+
+        <div class="table-container">
+          <table class="dispatch-table">
+            <thead>
+              <tr>
+                <th>Backend Trip</th>
+                <th>Destination</th>
+                <th>Confirmed Bookings</th>
+                <th>Activation Threshold</th>
+                <th>Recommended Bus</th>
+                <th>Bus Capacity</th>
+                <th>Recommended Conductor</th>
+                <th>Departure</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="confirmed-table-body">
+              <tr><td colspan="9" class="text-center">Loading backend fleet assignments...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- Route Grouping Advisories Banner -->
-      <div class="advisory-banner glass-panel" id="grouping-advisory-container">
-        <div class="advisory-icon">💡</div>
-        <div class="advisory-content">
-          <h4>Smart Route Grouping Advisory (OR-Tools Analysis)</h4>
-          <p id="grouping-advisory-text">Evaluating regional route bundling opportunities...</p>
+      <!-- Section B: Forecast Pre-Positioning Proposals -->
+      <div class="optimization-block glass-panel" style="margin-top: 1rem;">
+        <div class="block-header">
+          <div class="badge-advisory-rule">ADVISORY FORECAST ONLY • NOT AN ASSIGNMENT</div>
+          <h4>Forecast Pre-Positioning & Early Trip Proposals</h4>
+          <p class="block-desc">Identifies anticipated passenger surges from Model 04 forecasts to propose advance bus positioning or opening early booking slots.</p>
         </div>
-      </div>
 
-      <!-- Detailed Dispatch Manifest Table -->
-      <div class="table-container glass-panel">
-        <table class="dispatch-table">
-          <thead>
-            <tr>
-              <th>Destination Route</th>
-              <th>Planning Demand</th>
-              <th>Vehicles Allocated (OR-Tools)</th>
-              <th>Total Capacity</th>
-              <th>Load Factor</th>
-              <th>Departure Slot</th>
-              <th>Platform Bay</th>
-              <th>Status</th>
-              <th>Operating Action</th>
-            </tr>
-          </thead>
-          <tbody id="dispatch-table-body">
-            <tr><td colspan="9" class="text-center">Loading transport optimization plan...</td></tr>
-          </tbody>
-        </table>
+        <div class="proposals-grid" id="proposals-container">
+          <p class="placeholder-text">Evaluating route demand forecasts...</p>
+        </div>
       </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- STAGE 3: DEPLOY (OPERATOR DISPATCH MANIFEST) -->
+    <!-- STAGE 3: TRANSMIT RECOMMENDATIONS TO BACKEND -->
     <!-- ============================================================ -->
     <section class="stage-section">
       <div class="section-header">
-        <div class="stage-pill pill-deploy">STAGE 3: DEPLOY</div>
-        <h3>Operator Approval & Digital Dispatch Manifest</h3>
-        <p class="section-desc">Lock the plan, assign drivers, and issue verified departure manifests</p>
+        <div class="stage-pill pill-deploy">STAGE 3: BACKEND TRANSMISSION</div>
+        <h3>Transmit Recommendations to RailBus Backend</h3>
+        <p class="section-desc">SmartSync pushes recommendations via authenticated API (POST /api/v1/smartsync/recommendations). Final assignment execution is operator-authorized in the backend.</p>
       </div>
 
       <div class="deploy-grid">
         <div class="deploy-card glass-panel">
-          <h4>Operator Sign-Off</h4>
-          <p>Review the OR-Tools optimized plan above and confirm authorization for vehicle dispatch from Mysuru Junction bays.</p>
+          <h4>Operator Hand-Off</h4>
+          <p>This action transmits the OR-Tools optimization results directly to the backend. It will <strong>NOT</strong> dispatch vehicles or change trips directly.</p>
           
-          <div class="form-group">
-            <label for="operator-name-input">Authorizing Dispatch Controller</label>
-            <input type="text" id="operator-name-input" value="S. Kumar (Chief Transit Controller)" placeholder="Enter operator name">
-          </div>
-
-          <div class="form-group">
-            <label for="operator-notes-input">Operational Notes / Special Directives</label>
-            <input type="text" id="operator-notes-input" placeholder="e.g. Ensure reserve Mini RailBus ready at Bay 4 for luggage transfer">
+          <div class="transmission-info-box">
+            <div class="info-row">
+              <span>Target Endpoint:</span>
+              <code>POST /api/v1/smartsync/recommendations</code>
+            </div>
+            <div class="info-row">
+              <span>Authentication:</span>
+              <code>Bearer JWT (Operator Role)</code>
+            </div>
+            <div class="info-row">
+              <span>Data Source:</span>
+              <strong id="disp-source-tag">SYNTHETIC</strong>
+            </div>
+            <div class="info-row">
+              <span>Pipeline Version:</span>
+              <strong>v1.1.0</strong>
+            </div>
           </div>
 
           <div class="deploy-action-row">
-            <button id="btn-deploy-action" class="btn btn-primary btn-large">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"></path></svg>
-              Confirm & Issue Dispatch Manifest
+            <button id="btn-transmit-action" class="btn btn-primary btn-large">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+              Transmit Recommendations to Backend
             </button>
-            <div id="deploy-status-badge" class="badge badge-pending">Ready for Deployment</div>
+            <div id="transmit-status-badge" class="badge badge-pending">Ready to Transmit</div>
           </div>
         </div>
 
-        <!-- Official Digital Manifest Certificate -->
-        <div class="manifest-card glass-panel" id="manifest-display">
+        <!-- Transmission Log / Backend Response Viewer -->
+        <div class="manifest-card glass-panel" id="transmission-log-card">
           <div class="manifest-header">
-            <div class="manifest-logo">RAILBUS OPERATIONAL MANIFEST</div>
-            <div class="manifest-id" id="disp-manifest-id">MANIFEST: NOT YET ISSUED</div>
+            <div class="manifest-logo">BACKEND TRANSMISSION LOG</div>
+            <div class="manifest-id" id="disp-trans-id">STATUS: PENDING</div>
           </div>
-          <div class="manifest-body" id="disp-manifest-body">
-            <p class="placeholder-text">Click "Confirm & Issue Dispatch Manifest" to lock in fleet schedules and generate the verified digital manifest.</p>
+          <div class="manifest-body" id="disp-trans-body">
+            <p class="placeholder-text">Click "Transmit Recommendations" to send the optimization payload to the RailBus Backend API.</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- WHAT-IF OPERATIONAL SIMULATION LAB -->
+    <!-- POST-ARRIVAL EVALUATION AUDIT -->
     <!-- ============================================================ -->
     <section class="stage-section">
       <div class="section-header">
-        <div class="stage-pill pill-sim">SIMULATION LAB</div>
-        <h3>What-If Operational Stress Testing</h3>
-        <p class="section-desc">Simulate train delay spikes, booking surges, or festival crowds to observe dynamic demand & fleet re-allocation</p>
+        <div class="stage-pill pill-sim">OPS & DRIFT MONITORING</div>
+        <h3>Post-Arrival Evaluation Job</h3>
+        <p class="section-desc">Audits pre-arrival predictions against actual observed counts after the train has arrived at Mysuru</p>
       </div>
 
       <div class="sim-panel glass-panel">
         <div class="sim-controls">
-          <div class="sim-slider-group">
-            <div class="slider-header">
-              <label>Train Delay Spike</label>
-              <span class="slider-val" id="val-delay-delta">+0 mins</span>
-            </div>
-            <input type="range" id="sim-delay-slider" min="0" max="90" step="15" value="0">
-          </div>
-
-          <div class="sim-slider-group">
-            <div class="slider-header">
-              <label>Last-Minute Booking Growth</label>
-              <span class="slider-val" id="val-booking-mult">1.0x (Normal)</span>
-            </div>
-            <input type="range" id="sim-booking-slider" min="0.5" max="3.0" step="0.25" value="1.0">
-          </div>
-
-          <div class="sim-slider-group">
-            <div class="slider-header">
-              <label>Festival / Peak Surge</label>
-              <span class="slider-val" id="val-surge-mult">1.0x (Standard)</span>
-            </div>
-            <input type="range" id="sim-surge-slider" min="1.0" max="2.5" step="0.25" value="1.0">
-          </div>
-
-          <div class="sim-btn-wrapper">
-            <button id="btn-run-sim" class="btn btn-secondary">Run Simulation</button>
-            <button id="btn-reset-sim" class="btn btn-ghost">Reset</button>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">
+            Compare pre-arrival forecasts at T-24h, T-6h, T-2h, and T-30m against ground truth alighting and RailBus passenger counts.
+          </p>
+          <div class="sim-btn-wrapper" style="margin-top: 1rem;">
+            <button id="btn-run-audit" class="btn btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              Run Post-Arrival Audit
+            </button>
           </div>
         </div>
 
-        <div class="sim-results" id="sim-results-output">
+        <div class="audit-results" id="audit-results-output">
           <div class="sim-card">
-            <span>Simulated Alighting (M01):</span>
-            <strong id="sim-res-alight">-- pax</strong>
+            <span>Model 01 Alighting Forecast:</span>
+            <strong id="audit-m1-pred">-- pax</strong>
           </div>
           <div class="sim-card">
-            <span>Simulated Transit Need (M03):</span>
-            <strong id="sim-res-transit">-- pax</strong>
+            <span>Actual Alighting Ground Truth:</span>
+            <strong id="audit-m1-actual">-- pax</strong>
           </div>
           <div class="sim-card">
-            <span>Simulated RailBus Adoption (M04):</span>
-            <strong id="sim-res-adoption">-- pax</strong>
+            <span>Forecast Residual Error:</span>
+            <strong id="audit-m1-error">-- pax (--%)</strong>
           </div>
           <div class="sim-card">
-            <span>Dynamic Fleet Capacity:</span>
-            <strong id="sim-res-fleet">-- seats</strong>
-          </div>
-          <div class="sim-card">
-            <span>Dynamic Load Factor:</span>
-            <strong id="sim-res-lf">--%</strong>
+            <span>Within 80% Confidence Interval:</span>
+            <strong id="audit-m1-interval">--</strong>
           </div>
         </div>
       </div>
@@ -432,7 +399,7 @@
   </main>
 
   <footer class="bottom-footer">
-    <p>RailBus Intelligence Engine • Real-time Demand & Fleet Optimization System • Mysuru Junction Operations</p>
+    <p>RailBus SmartSync Module • Advisory Fleet Supply Recommendation Engine • Data Source: SYNTHETIC • Mysuru Junction Operations</p>
   </footer>
 
   <script src="/static/app.js"></script>

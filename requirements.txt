@@ -1,0 +1,12 @@
+# RailBus SmartSync Intelligence Module — Pinned Requirements
+fastapi==0.115.11
+uvicorn==0.34.0
+pydantic==2.10.6
+scikit-learn==1.7.2
+xgboost==3.2.0
+ortools==9.15.6755
+pandas==2.3.3
+numpy==2.2.6
+scipy==1.14.1
+joblib==1.6.0
+pytest==8.3.4

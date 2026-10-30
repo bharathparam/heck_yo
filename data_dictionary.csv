@@ -1,6 +1,8 @@
-file,column,meaning,role
-train_arrival_events.csv,alighting_passengers_actual_synthetic,Synthetic actual passenger count alighting at Mysuru for an event,Model A target
-railbus_demand_snapshots.csv,final_railbus_passengers_actual_synthetic,Synthetic final RailBus customers for a destination and train event,Model B target
-railbus_demand_snapshots.csv,current_confirmed_bookings,Bookings already confirmed at the snapshot time,Model B feature
-railbus_demand_snapshots.csv,passengers_submitted_interest,Passenger count represented by interest submissions by snapshot time,Model B feature
-railbus_demand_snapshots.csv,snapshot_hours_before_arrival,Hours remaining until scheduled train arrival,Model B feature
+file,column,meaning,role,data_source
+train_arrival_events.csv,data_source,Indicates if the record was artificially generated or captured from station ground truth,Metadata,SYNTHETIC
+train_arrival_events.csv,alighting_passengers_actual_synthetic,Synthetic actual passenger count alighting at Mysuru for an event,Model 01 target,SYNTHETIC
+railbus_demand_snapshots.csv,data_source,Indicates if the record was artificially generated or captured from real bookings,Metadata,SYNTHETIC
+railbus_demand_snapshots.csv,final_railbus_passengers_actual_synthetic,Synthetic final RailBus customers for a destination and train event,Model 04 target,SYNTHETIC
+railbus_demand_snapshots.csv,current_confirmed_bookings,Bookings confirmed at snapshot time (subject to app-user censoring),Model 04 feature & optimizer ground truth,SYNTHETIC
+railbus_demand_snapshots.csv,passengers_submitted_interest,Passenger search and intent signals (mitigates app-offer censoring),Model 04 feature,SYNTHETIC
+railbus_demand_snapshots.csv,snapshot_hours_before_arrival,Hours remaining until scheduled train arrival (24h, 6h, 2h, 30m),Model 04 feature,SYNTHETIC

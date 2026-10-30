@@ -1,0 +1,225 @@
+[
+  {
+    "audit_id": "AUDIT-EVT00001-20261030181842",
+    "event_id": "EVT00001",
+    "train_id": "SYN1002",
+    "data_source": "SYNTHETIC",
+    "model_version": "v1.1.0",
+    "evaluated_at": "2026-10-30T18:18:42.290117Z",
+    "model_01_audit": {
+      "served_by": "BASELINE_POISSON_GLM",
+      "is_baseline": true,
+      "predicted_alighting": 156,
+      "actual_alighting": 159,
+      "absolute_error": 3,
+      "percentage_error": 1.9,
+      "within_80pct_interval": true,
+      "interval": [
+        95,
+        168
+      ]
+    },
+    "model_04_horizon_audits": [
+      {
+        "horizon_hours": 24.0,
+        "predicted_total": 21,
+        "actual_total": 21,
+        "total_error": 0,
+        "routes": [
+          {
+            "destination": "Bengaluru",
+            "predicted": 10,
+            "actual": 15,
+            "absolute_error": 5,
+            "in_80pct_range": false
+          },
+          {
+            "destination": "Mandya",
+            "predicted": 4,
+            "actual": 2,
+            "absolute_error": 2,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Hassan",
+            "predicted": 2,
+            "actual": 1,
+            "absolute_error": 1,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Chamarajanagar",
+            "predicted": 2,
+            "actual": 1,
+            "absolute_error": 1,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Nanjangud",
+            "predicted": 1,
+            "actual": 0,
+            "absolute_error": 1,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Other",
+            "predicted": 2,
+            "actual": 2,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          }
+        ]
+      },
+      {
+        "horizon_hours": 6.0,
+        "predicted_total": 20,
+        "actual_total": 21,
+        "total_error": 1,
+        "routes": [
+          {
+            "destination": "Bengaluru",
+            "predicted": 13,
+            "actual": 15,
+            "absolute_error": 2,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Mandya",
+            "predicted": 3,
+            "actual": 2,
+            "absolute_error": 1,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Hassan",
+            "predicted": 1,
+            "actual": 1,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Chamarajanagar",
+            "predicted": 1,
+            "actual": 1,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Nanjangud",
+            "predicted": 0,
+            "actual": 0,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Other",
+            "predicted": 2,
+            "actual": 2,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          }
+        ]
+      },
+      {
+        "horizon_hours": 2.0,
+        "predicted_total": 19,
+        "actual_total": 21,
+        "total_error": 2,
+        "routes": [
+          {
+            "destination": "Bengaluru",
+            "predicted": 13,
+            "actual": 15,
+            "absolute_error": 2,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Mandya",
+            "predicted": 2,
+            "actual": 2,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Hassan",
+            "predicted": 1,
+            "actual": 1,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Chamarajanagar",
+            "predicted": 1,
+            "actual": 1,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Nanjangud",
+            "predicted": 0,
+            "actual": 0,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Other",
+            "predicted": 2,
+            "actual": 2,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          }
+        ]
+      },
+      {
+        "horizon_hours": 0.5,
+        "predicted_total": 20,
+        "actual_total": 21,
+        "total_error": 1,
+        "routes": [
+          {
+            "destination": "Bengaluru",
+            "predicted": 15,
+            "actual": 15,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Mandya",
+            "predicted": 2,
+            "actual": 2,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Hassan",
+            "predicted": 1,
+            "actual": 1,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Chamarajanagar",
+            "predicted": 1,
+            "actual": 1,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Nanjangud",
+            "predicted": 0,
+            "actual": 0,
+            "absolute_error": 0,
+            "in_80pct_range": true
+          },
+          {
+            "destination": "Other",
+            "predicted": 1,
+            "actual": 2,
+            "absolute_error": 1,
+            "in_80pct_range": true
+          }
+        ]
+      }
+    ]
+  }
+]
