@@ -1,0 +1,21 @@
+{
+  "model_id": "Model_02",
+  "name": "Destination-wise Passenger Distribution",
+  "question": "Where will those passengers go after arriving?",
+  "destinations": [
+    "Bengaluru",
+    "Chamarajanagar",
+    "Hassan",
+    "Mandya",
+    "Nanjangud",
+    "Other"
+  ],
+  "average_distribution": {
+    "Bengaluru": 56.2,
+    "Chamarajanagar": 3.2,
+    "Hassan": 13.2,
+    "Mandya": 17.4,
+    "Nanjangud": 0.4,
+    "Other": 9.6
+  }
+}

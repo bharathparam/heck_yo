@@ -1,0 +1,50 @@
+{
+  "features": [
+    "snapshot_hours_before_arrival",
+    "train_id",
+    "origin_station",
+    "destination_station",
+    "train_type",
+    "arrival_hour",
+    "day_of_week",
+    "is_weekend",
+    "is_holiday_synthetic",
+    "festival_period_synthetic",
+    "month",
+    "weather_synthetic",
+    "current_confirmed_bookings",
+    "passengers_submitted_interest",
+    "booking_growth_last_hour_synthetic",
+    "historical_route_demand_synthetic"
+  ],
+  "target": "final_railbus_passengers_actual_synthetic",
+  "categorical_features": [
+    "train_id",
+    "origin_station",
+    "destination_station",
+    "train_type",
+    "weather_synthetic"
+  ],
+  "numerical_features": [
+    "snapshot_hours_before_arrival",
+    "arrival_hour",
+    "day_of_week",
+    "is_weekend",
+    "is_holiday_synthetic",
+    "festival_period_synthetic",
+    "month",
+    "current_confirmed_bookings",
+    "passengers_submitted_interest",
+    "booking_growth_last_hour_synthetic",
+    "historical_route_demand_synthetic"
+  ],
+  "train_samples": 57600,
+  "test_samples": 14400,
+  "metrics": {
+    "mae": 0.77,
+    "rmse": 1.18,
+    "wape_pct": 25.1,
+    "coverage_80pct": 90.2,
+    "avg_interval_width": 4.4
+  }
+}

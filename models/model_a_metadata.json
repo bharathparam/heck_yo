@@ -1,0 +1,40 @@
+{
+  "features": [
+    "train_id",
+    "origin_station",
+    "train_type",
+    "arrival_hour",
+    "day_of_week",
+    "is_weekend",
+    "is_holiday_synthetic",
+    "festival_period_synthetic",
+    "month",
+    "peak_season",
+    "weather_synthetic"
+  ],
+  "target": "alighting_passengers_actual_synthetic",
+  "categorical_features": [
+    "train_id",
+    "origin_station",
+    "train_type",
+    "weather_synthetic"
+  ],
+  "numerical_features": [
+    "arrival_hour",
+    "day_of_week",
+    "is_weekend",
+    "is_holiday_synthetic",
+    "festival_period_synthetic",
+    "month",
+    "peak_season"
+  ],
+  "train_samples": 2400,
+  "test_samples": 600,
+  "metrics": {
+    "mae": 30.03,
+    "rmse": 38.54,
+    "wape_pct": 22.5,
+    "coverage_80pct": 69.0,
+    "avg_interval_width": 74.5
+  }
+}

@@ -1,0 +1,6 @@
+file,column,meaning,role
+train_arrival_events.csv,alighting_passengers_actual_synthetic,Synthetic actual passenger count alighting at Mysuru for an event,Model A target
+railbus_demand_snapshots.csv,final_railbus_passengers_actual_synthetic,Synthetic final RailBus customers for a destination and train event,Model B target
+railbus_demand_snapshots.csv,current_confirmed_bookings,Bookings already confirmed at the snapshot time,Model B feature
+railbus_demand_snapshots.csv,passengers_submitted_interest,Passenger count represented by interest submissions by snapshot time,Model B feature
+railbus_demand_snapshots.csv,snapshot_hours_before_arrival,Hours remaining until scheduled train arrival,Model B feature
