@@ -25,10 +25,16 @@ class BookingStatus(str, enum.Enum):
     REFUNDED = "REFUNDED"
 
 
+class RouteType(str, enum.Enum):
+    CITY = "CITY"
+    INTERCITY = "INTERCITY"
+
+
 class PaymentStatus(str, enum.Enum):
     INITIATED = "INITIATED"
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
+    REFUNDED = "REFUNDED"
 
 
 class TicketStatus(str, enum.Enum):
@@ -48,3 +54,21 @@ class TrainArrivalStatus(str, enum.Enum):
     ON_TIME = "ON_TIME"
     DELAYED = "DELAYED"
     CANCELLED = "CANCELLED"
+
+
+class AuditAction(str, enum.Enum):
+    STATE_TRANSITION = "STATE_TRANSITION"
+    DISPATCHER_ASSIGNMENT = "DISPATCHER_ASSIGNMENT"
+    PAYMENT_CONFIRMED = "PAYMENT_CONFIRMED"
+    TRIP_EXPIRED = "TRIP_EXPIRED"
+    TRIP_CANCELLED = "TRIP_CANCELLED"
+    BOARDING = "BOARDING"
+
+
+class NotificationType(str, enum.Enum):
+    TRIP_SCHEDULED = "TRIP_SCHEDULED"
+    TRIP_CANCELLED = "TRIP_CANCELLED"
+    PAYMENT_REFUNDED = "PAYMENT_REFUNDED"
+    BOARDING_OPEN = "BOARDING_OPEN"
+    GENERAL = "GENERAL"
+

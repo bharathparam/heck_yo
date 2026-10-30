@@ -40,6 +40,7 @@ class ManifestResponse(BaseModel):
 class BoardTicketRequest(BaseModel):
     qr_code: str
     device_id: Optional[str] = "conductor-app"
+    client_scan_id: Optional[str] = None
 
 
 class BoardTicketResponse(BaseModel):
@@ -55,8 +56,11 @@ class BoardTicketResponse(BaseModel):
 
 class OfflineBoardingItem(BaseModel):
     ticket_id: str
-    boarded_at: datetime
+    boarded_at: Optional[datetime] = None
     device_id: Optional[str] = None
+    client_scan_id: Optional[str] = None
+    scan_id: Optional[str] = None
+
 
 
 class OfflineSyncBatchRequest(BaseModel):

@@ -1,9 +1,11 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, DateTime, Enum as SAEnum, ForeignKey, Text
+from typing import Optional
+from sqlalchemy import String, DateTime, Enum as SAEnum, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from app.core.constants import TicketStatus
+
 
 
 class Ticket(Base):
@@ -33,6 +35,9 @@ class Ticket(Base):
 
 class BoardingRecord(Base):
     __tablename__ = "boarding_records"
+    __table_args__ = (
+        UniqueConstraint("trip_id", "client_scan_id", name="uq_boarding_trip_scan_id"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     ticket_id: Mapped[str] = mapped_column(String(36), ForeignKey("tickets.id"), unique=True, nullable=False)
@@ -40,8 +45,10 @@ class BoardingRecord(Base):
     conductor_id: Mapped[str] = mapped_column(String(36), ForeignKey("conductors.id"), nullable=False)
     passenger_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False)
     boarded_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
-    scan_device_id: Mapped[str] = mapped_column(String(100), nullable=True)
+    scan_device_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    client_scan_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
 
     ticket = relationship("Ticket", back_populates="boarding_record")
     trip = relationship("Trip", back_populates="boarding_records")
     conductor = relationship("Conductor", back_populates="boardings")
+

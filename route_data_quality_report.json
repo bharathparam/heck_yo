@@ -1,0 +1,145 @@
+{
+  "total_routes_analyzed": 414,
+  "loop_routes_count": 0,
+  "routes_with_duplicates_count": 39,
+  "routes_not_passing_station_count": 228,
+  "loop_routes_sample": [],
+  "duplicate_stops_sample": [
+    {
+      "bus_num": "100 Up",
+      "duplicate_stops": [
+        "Hardinge Circle",
+        "KR Hospital",
+        "Hosahundi"
+      ]
+    },
+    {
+      "bus_num": "10A Up",
+      "duplicate_stops": [
+        "Ganesh Temple"
+      ]
+    },
+    {
+      "bus_num": "10A Down",
+      "duplicate_stops": [
+        "Ganesh Temple"
+      ]
+    },
+    {
+      "bus_num": "10C Up",
+      "duplicate_stops": [
+        "Ganesh Temple"
+      ]
+    },
+    {
+      "bus_num": "10C Down",
+      "duplicate_stops": [
+        "Ganesh Temple"
+      ]
+    },
+    {
+      "bus_num": "116A Up",
+      "duplicate_stops": [
+        "State Bank of India",
+        "PK Sanitorium",
+        "KR Hospital",
+        "Metagalli Police Station",
+        "Abhishek Circle",
+        "Basavanagudi",
+        "Akashavani",
+        "Railway Station",
+        "CITB Choultry",
+        "Dasappa Circle",
+        "Surya Bakery",
+        "Vani Vilas Water Works",
+        "Made Gowda Circle",
+        "Sanjeevini Circle",
+        "Vonti Koppal Temple",
+        "ESI Hospital"
+      ]
+    },
+    {
+      "bus_num": "116D Down",
+      "duplicate_stops": [
+        "PK Sanitorium",
+        "ESI Hospital",
+        "Dasappa Circle"
+      ]
+    },
+    {
+      "bus_num": "116RR Up",
+      "duplicate_stops": [
+        "KR Hospital",
+        "Akashavani",
+        "Railway Station",
+        "Dasappa Circle",
+        "Vani Vilas Water Works",
+        "Vonti Koppal Temple"
+      ]
+    },
+    {
+      "bus_num": "119C Up",
+      "duplicate_stops": [
+        "Mysore Rural Bus Stand"
+      ]
+    },
+    {
+      "bus_num": "119E Up",
+      "duplicate_stops": [
+        "Mysore Rural Bus Stand"
+      ]
+    }
+  ],
+  "missing_station_sample": [
+    {
+      "bus_num": "11 Up",
+      "origin": "Kada Office",
+      "destination": "JP Nagar Last Stop"
+    },
+    {
+      "bus_num": "11 Down",
+      "origin": "JP Nagar Last Stop",
+      "destination": "Kada Office"
+    },
+    {
+      "bus_num": "110 Down",
+      "origin": "Kalisiddana Hundi",
+      "destination": "City Bus Stand"
+    },
+    {
+      "bus_num": "110A Down",
+      "origin": "Kanthirava Narashimharajapura",
+      "destination": "City Bus Stand"
+    },
+    {
+      "bus_num": "110C Down",
+      "origin": "Galigara Hundi",
+      "destination": "City Bus Stand"
+    },
+    {
+      "bus_num": "110HN Up",
+      "origin": "Sathagalli Depot OUT Gate",
+      "destination": "Hebbadi"
+    },
+    {
+      "bus_num": "110HN Down",
+      "origin": "Hebbadi",
+      "destination": "Sathagalli Depot OUT Gate"
+    },
+    {
+      "bus_num": "110Y Up",
+      "origin": "Sathagalli Bus Stand",
+      "destination": "Yaraganahalli"
+    },
+    {
+      "bus_num": "119N Up",
+      "origin": "CITB Choultry",
+      "destination": "Vijaya Nagara Depot"
+    },
+    {
+      "bus_num": "119N Down",
+      "origin": "Vijaya Nagara Depot",
+      "destination": "CITB Choultry"
+    }
+  ]
+}

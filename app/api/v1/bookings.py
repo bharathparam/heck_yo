@@ -36,6 +36,58 @@ async def list_my_bookings(
     return await BookingService.get_passenger_bookings(db, current_user.id)
 
 
+@router.get("/{booking_id}", response_model=BookingResponse)
+async def get_booking_by_id(
+    booking_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Retrieves single booking details (owner or admin)"""
+    from sqlalchemy import select
+    from app.core.exceptions import EntityNotFoundException, ForbiddenException
+    from app.models.booking import Booking
+
+    stmt = select(Booking).where(Booking.id == booking_id)
+    booking = (await db.execute(stmt)).scalar_one_or_none()
+    if not booking:
+        raise EntityNotFoundException("Booking", booking_id)
+
+    if booking.passenger_id != current_user.id and current_user.role != UserRole.ADMIN:
+        raise ForbiddenException("Not authorized to view this booking")
+
+    return booking
+
+
+@router.get("/{booking_id}/ticket")
+async def get_booking_ticket(
+    booking_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Retrieves issued ticket details for a booking"""
+    from sqlalchemy import select
+    from app.core.exceptions import EntityNotFoundException, ForbiddenException
+    from app.models.booking import Booking
+    from app.models.ticket import Ticket
+    from app.services.ticket_service import TicketService
+
+    stmt = select(Booking).where(Booking.id == booking_id)
+    booking = (await db.execute(stmt)).scalar_one_or_none()
+    if not booking:
+        raise EntityNotFoundException("Booking", booking_id)
+
+    if booking.passenger_id != current_user.id and current_user.role != UserRole.ADMIN:
+        raise ForbiddenException("Not authorized to view this ticket")
+
+    tkt_stmt = select(Ticket).where(Ticket.booking_id == booking.id)
+    ticket = (await db.execute(tkt_stmt)).scalar_one_or_none()
+    if not ticket:
+        raise EntityNotFoundException("Ticket for booking", booking_id)
+
+    ticket_details = await TicketService.get_ticket_details(db, ticket.id)
+    return ticket_details
+
+
 @router.post("/simulate-payment", response_model=PaymentResponse)
 async def simulate_payment(
     data: PaymentSimulationRequest,
@@ -46,8 +98,9 @@ async def simulate_payment(
     Simulates payment for a booking.
     Upon success:
     - Confirms booking
-    - Increments trip demand counter
-    - Triggers threshold check (transitions to THRESHOLD_MET if >= 20)
-    - Issues HMAC-signed QR ticket
+    - Increments trip demand counter atomically
+    - Triggers threshold check (transitions to THRESHOLD_MET if >= min_threshold)
+    - If trip is SCHEDULED, issues HMAC-signed QR ticket
     """
     return await BookingService.confirm_payment_and_issue_ticket(db, current_user.id, data)
+

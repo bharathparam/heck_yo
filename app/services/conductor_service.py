@@ -136,11 +136,13 @@ class ConductorService:
                 error_code="INVALID_STATUS"
             )
 
-        trip.status = TripStatus.BOARDING
-        trip.updated_at = datetime.now(timezone.utc)
-        await db.commit()
-        await db.refresh(trip)
-        return trip
+        if trip.status == TripStatus.BOARDING:
+            return trip
+
+        from app.services.state_machine import transition_trip_state
+        return await transition_trip_state(
+            db, trip_id=trip_id, target_status=TripStatus.BOARDING, performed_by=conductor_id, reason="Conductor opened boarding window"
+        )
 
     @staticmethod
     async def confirm_passenger_boarding(
@@ -148,7 +150,8 @@ class ConductorService:
         trip_id: str,
         conductor: Conductor,
         qr_code_str: str,
-        device_id: Optional[str] = "conductor-app"
+        device_id: Optional[str] = "conductor-app",
+        client_scan_id: Optional[str] = None
     ) -> BoardTicketResponse:
         # Verify trip assignment
         stmt_t = select(Trip).where(Trip.id == trip_id)
@@ -158,6 +161,25 @@ class ConductorService:
 
         if trip.conductor_id != conductor.id:
             raise ForbiddenException("You are not the assigned conductor for this trip")
+
+        # Check client scan id idempotency
+        if client_scan_id:
+            stmt_scan = select(BoardingRecord).where(
+                BoardingRecord.trip_id == trip_id, BoardingRecord.client_scan_id == client_scan_id
+            ).options(selectinload(BoardingRecord.ticket).selectinload(Ticket.booking).selectinload(Booking.passenger))
+            existing_scan = (await db.execute(stmt_scan)).scalar_one_or_none()
+            if existing_scan:
+                passenger_name = existing_scan.ticket.booking.passenger.full_name if (existing_scan.ticket and existing_scan.ticket.booking and existing_scan.ticket.booking.passenger) else "Passenger"
+                return BoardTicketResponse(
+                    success=True,
+                    ticket_id=existing_scan.ticket_id,
+                    ticket_reference=existing_scan.ticket.ticket_reference if existing_scan.ticket else "",
+                    passenger_name=passenger_name,
+                    boarded_at=existing_scan.boarded_at,
+                    boarded_count=trip.boarded_count,
+                    total_passengers=trip.demand_count,
+                    message="Already recorded via client scan id"
+                )
 
         ticket_id = None
         if "." in qr_code_str:
@@ -193,6 +215,10 @@ class ConductorService:
         if not ticket:
             raise EntityNotFoundException("Ticket", ticket_id)
 
+        # Enforce that ticket belongs to this trip
+        if ticket.trip_id != trip_id:
+            raise InvalidTicketException(f"Ticket belongs to a different trip ({ticket.trip_id})")
+
         if ticket.status == TicketStatus.BOARDED:
             raise AlreadyBoardedException(f"Ticket {ticket.ticket_reference} was already boarded!")
 
@@ -211,7 +237,8 @@ class ConductorService:
             conductor_id=conductor.id,
             passenger_id=ticket.passenger_id,
             boarded_at=now,
-            scan_device_id=device_id
+            scan_device_id=device_id,
+            client_scan_id=client_scan_id
         )
         db.add(boarding_rec)
 
@@ -220,12 +247,15 @@ class ConductorService:
         trip.boarded_count += seats
         trip.updated_at = now
 
-        # Auto-advance trip to BOARDING if was SCHEDULED
+        # Auto-advance trip to BOARDING via state machine if was SCHEDULED
         if trip.status == TripStatus.SCHEDULED:
-            trip.status = TripStatus.BOARDING
-
-        await db.commit()
-        await db.refresh(trip)
+            from app.services.state_machine import transition_trip_state
+            await transition_trip_state(
+                db, trip_id=trip.id, target_status=TripStatus.BOARDING, performed_by=conductor.user_id, reason="First passenger boarding opened status"
+            )
+        else:
+            await db.commit()
+            await db.refresh(trip)
 
         passenger_name = ticket.booking.passenger.full_name if ticket.booking and ticket.booking.passenger else "Passenger"
 
@@ -260,6 +290,16 @@ class ConductorService:
         errors: List[str] = []
 
         for item in items:
+            # 1. Idempotency check via client_scan_id if present
+            scan_id = getattr(item, "client_scan_id", None) or getattr(item, "scan_id", None)
+            if scan_id:
+                stmt_scan = select(BoardingRecord).where(
+                    BoardingRecord.trip_id == trip_id, BoardingRecord.client_scan_id == scan_id
+                )
+                if (await db.execute(stmt_scan)).scalar_one_or_none():
+                    # Idempotent skip
+                    continue
+
             stmt_tk = (
                 select(Ticket)
                 .where(Ticket.id == item.ticket_id)
@@ -269,6 +309,12 @@ class ConductorService:
             if not ticket:
                 failed_count += 1
                 errors.append(f"Ticket {item.ticket_id} not found")
+                continue
+
+            # Verify ticket belongs to this trip (reject foreign ticket)
+            if ticket.trip_id != trip_id:
+                failed_count += 1
+                errors.append(f"Ticket {item.ticket_id} belongs to a different trip ({ticket.trip_id})")
                 continue
 
             if ticket.status == TicketStatus.BOARDED:
@@ -284,7 +330,8 @@ class ConductorService:
                 conductor_id=conductor.id,
                 passenger_id=ticket.passenger_id,
                 boarded_at=item.boarded_at or datetime.now(timezone.utc),
-                scan_device_id=item.device_id or "offline-sync"
+                scan_device_id=item.device_id or "offline-sync",
+                client_scan_id=scan_id
             )
             db.add(boarding_rec)
             seats = ticket.booking.seat_count if ticket.booking else 1
@@ -317,8 +364,8 @@ class ConductorService:
         if trip.conductor_id != conductor_id:
             raise ForbiddenException("Conductor not assigned to this trip")
 
-        trip.status = status
-        trip.updated_at = datetime.now(timezone.utc)
-        await db.commit()
-        await db.refresh(trip)
-        return trip
+        from app.services.state_machine import transition_trip_state
+        return await transition_trip_state(
+            db, trip_id=trip_id, target_status=status, performed_by=conductor_id, reason=f"Conductor transitioned trip to {status.value}"
+        )
+

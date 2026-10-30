@@ -27,15 +27,18 @@ class Booking(Base):
     # Relationships
     trip = relationship("Trip", back_populates="bookings")
     passenger = relationship("User", back_populates="bookings")
-    payment = relationship("Payment", back_populates="booking", uselist=False)
-    ticket = relationship("Ticket", back_populates="booking", uselist=False)
+    payments = relationship("Payment", back_populates="booking", order_by="Payment.initiated_at.desc()")
+    tickets = relationship("Ticket", back_populates="booking")
+    ticket = relationship("Ticket", back_populates="booking", uselist=False, overlaps="tickets")
+
+
 
 
 class Payment(Base):
     __tablename__ = "payments"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    booking_id: Mapped[str] = mapped_column(String(36), ForeignKey("bookings.id"), unique=True, nullable=False)
+    booking_id: Mapped[str] = mapped_column(String(36), ForeignKey("bookings.id"), index=True, nullable=False)
     idempotency_key: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
     status: Mapped[PaymentStatus] = mapped_column(
         SAEnum(PaymentStatus), default=PaymentStatus.INITIATED, nullable=False
@@ -44,5 +47,7 @@ class Payment(Base):
     simulated_reference: Mapped[str] = mapped_column(String(100), nullable=True)
     initiated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     confirmed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    refunded_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
-    booking = relationship("Booking", back_populates="payment")
+    booking = relationship("Booking", back_populates="payments")
+

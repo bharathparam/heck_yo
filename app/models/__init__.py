@@ -5,6 +5,8 @@ from app.models.bus import Bus, Conductor
 from app.models.trip import Trip
 from app.models.booking import Booking, Payment
 from app.models.ticket import Ticket, BoardingRecord
+from app.models.audit import AuditLog
+from app.models.notification import Notification
 
 __all__ = [
     "User",
@@ -19,4 +21,7 @@ __all__ = [
     "Payment",
     "Ticket",
     "BoardingRecord",
+    "AuditLog",
+    "Notification",
 ]
+

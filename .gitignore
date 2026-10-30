@@ -46,3 +46,11 @@ htmlcov/
 .env
 .env.*
 !.env.example
+
+# Local SQLite databases
+*.db
+*.db-journal
+*.sqlite3
+railbus.db
+test_railbus.db
+

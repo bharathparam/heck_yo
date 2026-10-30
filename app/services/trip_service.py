@@ -26,11 +26,23 @@ class TripService:
         if not route:
             raise EntityNotFoundException("Route", data.route_id)
 
+        t_date = data.travel_date
+        if not t_date:
+            t_date = data.departure_time.date() if data.departure_time else datetime.now(timezone.utc).date()
+
+        deadline = data.deadline_at
+        if not deadline and data.departure_time:
+            from datetime import timedelta
+            deadline = data.departure_time - timedelta(minutes=45)
+
         new_trip = Trip(
             id=str(uuid.uuid4()),
             route_id=data.route_id,
             train_arrival_id=data.train_arrival_id,
             departure_time=data.departure_time,
+            deadline_at=deadline,
+            travel_date=t_date,
+            min_threshold=data.min_threshold or settings.DEMAND_ACTIVATION_THRESHOLD,
             base_fare=data.base_fare,
             status=TripStatus.AGGREGATING,
             demand_count=0,
@@ -88,12 +100,15 @@ class TripService:
                     status=t.status,
                     demand_count=t.demand_count,
                     capacity=t.capacity,
+                    min_threshold=t.min_threshold,
                     boarded_count=t.boarded_count,
                     base_fare=float(t.base_fare),
+                    travel_date=t.travel_date,
                     departure_time=t.departure_time,
+                    deadline_at=t.deadline_at,
                     bus_registration=t.bus.registration_number if t.bus else None,
                     conductor_name=t.conductor.user.full_name if t.conductor and t.conductor.user else None,
-                    threshold_met=(t.demand_count >= settings.DEMAND_ACTIVATION_THRESHOLD)
+                    threshold_met=(t.demand_count >= (t.min_threshold or settings.DEMAND_ACTIVATION_THRESHOLD))
                 )
             )
         return responses
@@ -106,56 +121,86 @@ class TripService:
         if not trip:
             raise EntityNotFoundException("Trip", trip_id)
 
-        # Trip must be THRESHOLD_MET or AGGREGATING (operator override allowed if threshold met)
-        if trip.demand_count < settings.DEMAND_ACTIVATION_THRESHOLD and trip.status == TripStatus.AGGREGATING:
+        # Assignment requirement: Trip must have met threshold (or be THRESHOLD_MET)
+        threshold = trip.min_threshold or settings.DEMAND_ACTIVATION_THRESHOLD
+        if trip.demand_count < threshold:
             raise DomainException(
                 status_code=400,
-                detail=f"Trip demand ({trip.demand_count}) has not reached minimum activation threshold ({settings.DEMAND_ACTIVATION_THRESHOLD})",
+                detail=f"Trip demand ({trip.demand_count}) has not reached minimum activation threshold ({threshold})",
                 error_code="THRESHOLD_NOT_MET"
             )
 
+        # Bus validation: must exist, be ACTIVE
         bus = (await db.execute(select(Bus).where(Bus.id == assign_data.bus_id))).scalar_one_or_none()
-        if not bus or not bus.is_active:
+        if not bus or not bus.is_active or bus.status != BusStatus.ACTIVE:
             raise EntityNotFoundException("Bus", assign_data.bus_id)
 
+        # Bus capacity must be >= trip demand
+        if bus.capacity < trip.demand_count:
+            raise DomainException(
+                status_code=400,
+                detail=f"Bus capacity ({bus.capacity}) is less than confirmed trip demand ({trip.demand_count})",
+                error_code="CAPACITY_INSUFFICIENT"
+            )
+
+        # Check overlapping bus assignments
+        if trip.departure_time:
+            from datetime import timedelta
+            window_start = trip.departure_time - timedelta(hours=2)
+            window_end = trip.departure_time + timedelta(hours=2)
+            bus_overlap = await db.execute(
+                select(Trip)
+                .where(Trip.id != trip.id)
+                .where(Trip.bus_id == bus.id)
+                .where(Trip.status.in_([TripStatus.SCHEDULED, TripStatus.BOARDING, TripStatus.DEPARTED]))
+                .where(Trip.departure_time >= window_start, Trip.departure_time <= window_end)
+            )
+            if bus_overlap.scalar_one_or_none():
+                raise DomainException(
+                    status_code=409,
+                    detail="Bus is already assigned to another active trip in this time window",
+                    error_code="BUS_OVERLAP_CONFLICT"
+                )
+
+        # Conductor validation: must exist, be available
         conductor = (await db.execute(select(Conductor).where(Conductor.id == assign_data.conductor_id))).scalar_one_or_none()
-        if not conductor:
+        if not conductor or not conductor.is_available:
             raise EntityNotFoundException("Conductor", assign_data.conductor_id)
 
+        # Check overlapping conductor assignments
+        if trip.departure_time:
+            from datetime import timedelta
+            c_window_start = trip.departure_time - timedelta(hours=2)
+            c_window_end = trip.departure_time + timedelta(hours=2)
+            cond_overlap = await db.execute(
+                select(Trip)
+                .where(Trip.id != trip.id)
+                .where(Trip.conductor_id == conductor.id)
+                .where(Trip.status.in_([TripStatus.SCHEDULED, TripStatus.BOARDING, TripStatus.DEPARTED]))
+                .where(Trip.departure_time >= c_window_start, Trip.departure_time <= c_window_end)
+            )
+            if cond_overlap.scalar_one_or_none():
+                raise DomainException(
+                    status_code=409,
+                    detail="Conductor is already assigned to another active trip in this time window",
+                    error_code="CONDUCTOR_OVERLAP_CONFLICT"
+                )
+
+        # Apply assignment values
         trip.bus_id = bus.id
         trip.conductor_id = conductor.id
         trip.approved_by = operator_id
         trip.capacity = bus.capacity
-        trip.status = TripStatus.SCHEDULED
-        trip.updated_at = datetime.now(timezone.utc)
-
         await db.commit()
-        await db.refresh(trip)
-        return trip
+
+        # Run through centralized state machine to transition to SCHEDULED (which automatically issues tickets)
+        from app.services.state_machine import transition_trip_state
+        return await transition_trip_state(
+            db, trip_id=trip.id, target_status=TripStatus.SCHEDULED, performed_by=operator_id, reason="Operator assigned bus and conductor"
+        )
 
     @staticmethod
-    async def update_trip_status(db: AsyncSession, trip_id: str, new_status: TripStatus) -> Trip:
-        trip = await TripService.get_trip_by_id(db, trip_id)
-        if not trip:
-            raise EntityNotFoundException("Trip", trip_id)
+    async def update_trip_status(db: AsyncSession, trip_id: str, new_status: TripStatus, performed_by: Optional[str] = None, reason: Optional[str] = None) -> Trip:
+        from app.services.state_machine import transition_trip_state
+        return await transition_trip_state(db, trip_id=trip_id, target_status=new_status, performed_by=performed_by, reason=reason)
 
-        # State transition validation
-        valid_transitions = {
-            TripStatus.AGGREGATING: [TripStatus.THRESHOLD_MET, TripStatus.CANCELLED],
-            TripStatus.THRESHOLD_MET: [TripStatus.SCHEDULED, TripStatus.CANCELLED],
-            TripStatus.SCHEDULED: [TripStatus.BOARDING, TripStatus.CANCELLED],
-            TripStatus.BOARDING: [TripStatus.DEPARTED, TripStatus.CANCELLED],
-            TripStatus.DEPARTED: [TripStatus.COMPLETED],
-            TripStatus.COMPLETED: [],
-            TripStatus.CANCELLED: []
-        }
-
-        allowed = valid_transitions.get(trip.status, [])
-        if new_status not in allowed:
-            raise InvalidStateTransitionException(trip.status.value, new_status.value)
-
-        trip.status = new_status
-        trip.updated_at = datetime.now(timezone.utc)
-        await db.commit()
-        await db.refresh(trip)
-        return trip

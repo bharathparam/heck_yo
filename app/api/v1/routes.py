@@ -5,22 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
+from app.core.constants import RouteType
 from app.core.exceptions import EntityNotFoundException
 from app.models.route import Route, RouteStop
 from app.models.bus import Bus
 from app.schemas.trip import RouteResponse, RouteStopResponse
-from pydantic import BaseModel, ConfigDict
-
-
-class BusResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    registration_number: str
-    model: str
-    capacity: int
-    status: str
-    is_active: bool
+from app.schemas.admin import BusResponse
 
 
 router = APIRouter(tags=["Routes & Buses"])
@@ -29,11 +19,12 @@ router = APIRouter(tags=["Routes & Buses"])
 @router.get("/routes", response_model=List[RouteResponse])
 async def list_routes(
     q: Optional[str] = Query(None, description="Search route name, origin, destination, or stop"),
+    route_type: Optional[RouteType] = Query(None, description="Filter by CITY or INTERCITY"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
 ):
-    """Lists bus routes with search and pagination"""
+    """Lists bus routes with search, route type filter, and pagination"""
     stmt = (
         select(Route)
         .options(selectinload(Route.stops))
@@ -41,6 +32,9 @@ async def list_routes(
         .offset(offset)
         .limit(limit)
     )
+
+    if route_type:
+        stmt = stmt.where(Route.route_type == route_type)
 
     if q:
         query_pattern = f"%{q}%"
@@ -80,3 +74,4 @@ async def list_buses(
     stmt = select(Bus).order_by(Bus.registration_number.asc()).offset(offset).limit(limit)
     result = await db.execute(stmt)
     return result.scalars().all()
+

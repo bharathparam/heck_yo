@@ -14,7 +14,10 @@ from app.schemas.conductor import (
     OfflineSyncBatchRequest,
     OfflineSyncBatchResponse,
 )
+from app.schemas.trip import TripResponse
 from app.services.conductor_service import ConductorService
+from app.services.trip_service import TripService
+
 
 router = APIRouter(prefix="/conductor", tags=["Conductor Operations"])
 
@@ -38,7 +41,7 @@ async def get_trip_manifest(
     return await ConductorService.get_trip_manifest(db, trip_id, conductor.id)
 
 
-@router.post("/trips/{trip_id}/boarding/open")
+@router.post("/trips/{trip_id}/boarding/open", response_model=TripResponse)
 async def open_boarding(
     trip_id: str,
     conductor: Conductor = Depends(get_current_conductor),
@@ -46,7 +49,21 @@ async def open_boarding(
 ):
     """Opens passenger boarding window for the trip"""
     trip = await ConductorService.open_boarding_window(db, trip_id, conductor.id)
-    return {"trip_id": trip.id, "status": trip.status, "message": "Boarding window opened"}
+    trips = await TripService.list_trips(db)
+    for t in trips:
+        if t.id == trip.id:
+            return t
+    return TripResponse(
+        id=trip.id,
+        route_id=trip.route_id,
+        status=trip.status,
+        demand_count=trip.demand_count,
+        capacity=trip.capacity,
+        boarded_count=trip.boarded_count,
+        base_fare=float(trip.base_fare),
+        threshold_met=True
+    )
+
 
 
 @router.post("/trips/{trip_id}/board", response_model=BoardTicketResponse)
@@ -65,8 +82,10 @@ async def board_passenger_ticket(
         trip_id=trip_id,
         conductor=conductor,
         qr_code_str=data.qr_code,
-        device_id=data.device_id
+        device_id=data.device_id,
+        client_scan_id=data.client_scan_id
     )
+
 
 
 @router.post("/trips/{trip_id}/sync-offline", response_model=OfflineSyncBatchResponse)
@@ -85,7 +104,7 @@ async def sync_offline_boardings(
     )
 
 
-@router.post("/trips/{trip_id}/depart")
+@router.post("/trips/{trip_id}/depart", response_model=TripResponse)
 async def depart_trip(
     trip_id: str,
     conductor: Conductor = Depends(get_current_conductor),
@@ -93,10 +112,23 @@ async def depart_trip(
 ):
     """Marks trip as DEPARTED"""
     trip = await ConductorService.complete_trip(db, trip_id, conductor.id, TripStatus.DEPARTED)
-    return {"trip_id": trip.id, "status": trip.status, "message": "Trip marked as departed"}
+    trips = await TripService.list_trips(db)
+    for t in trips:
+        if t.id == trip.id:
+            return t
+    return TripResponse(
+        id=trip.id,
+        route_id=trip.route_id,
+        status=trip.status,
+        demand_count=trip.demand_count,
+        capacity=trip.capacity,
+        boarded_count=trip.boarded_count,
+        base_fare=float(trip.base_fare),
+        threshold_met=True
+    )
 
 
-@router.post("/trips/{trip_id}/complete")
+@router.post("/trips/{trip_id}/complete", response_model=TripResponse)
 async def complete_trip(
     trip_id: str,
     conductor: Conductor = Depends(get_current_conductor),
@@ -104,4 +136,18 @@ async def complete_trip(
 ):
     """Marks trip as COMPLETED upon arrival at destination"""
     trip = await ConductorService.complete_trip(db, trip_id, conductor.id, TripStatus.COMPLETED)
-    return {"trip_id": trip.id, "status": trip.status, "message": "Trip marked as completed"}
+    trips = await TripService.list_trips(db)
+    for t in trips:
+        if t.id == trip.id:
+            return t
+    return TripResponse(
+        id=trip.id,
+        route_id=trip.route_id,
+        status=trip.status,
+        demand_count=trip.demand_count,
+        capacity=trip.capacity,
+        boarded_count=trip.boarded_count,
+        base_fare=float(trip.base_fare),
+        threshold_met=True
+    )
+

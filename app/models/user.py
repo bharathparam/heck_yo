@@ -24,3 +24,5 @@ class User(Base):
     # Relationships
     conductor_profile = relationship("Conductor", back_populates="user", uselist=False)
     bookings = relationship("Booking", back_populates="passenger")
+    notifications = relationship("Notification", back_populates="user", order_by="Notification.created_at.desc()")
+

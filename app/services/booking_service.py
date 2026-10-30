@@ -20,6 +20,15 @@ from app.services.ticket_service import TicketService
 
 class BookingService:
     @staticmethod
+    async def get_max_active_bus_capacity(db: AsyncSession) -> int:
+        from app.models.bus import Bus
+        from app.core.constants import BusStatus
+        from sqlalchemy import func
+        stmt = select(func.max(Bus.capacity)).where(Bus.status == BusStatus.ACTIVE, Bus.is_active.is_(True))
+        max_cap = (await db.execute(stmt)).scalar()
+        return max_cap or 40
+
+    @staticmethod
     async def create_booking(db: AsyncSession, passenger_id: str, data: BookingCreate) -> Booking:
         # Fetch trip
         stmt = select(Trip).where(Trip.id == data.trip_id)
@@ -30,7 +39,13 @@ class BookingService:
         if trip.status in [TripStatus.DEPARTED, TripStatus.COMPLETED, TripStatus.CANCELLED]:
             raise DomainException(status_code=400, detail="Cannot book seats for this trip (already departed or closed)")
 
-        if trip.demand_count + data.seat_count > trip.capacity:
+        # Determine effective capacity: assigned bus capacity, or max active bus capacity before assignment
+        effective_capacity = trip.capacity
+        if trip.status in [TripStatus.AGGREGATING, TripStatus.THRESHOLD_MET] and not trip.bus_id:
+            effective_capacity = await BookingService.get_max_active_bus_capacity(db)
+            trip.capacity = effective_capacity
+
+        if trip.demand_count + data.seat_count > effective_capacity:
             raise TripCapacityExceededException("Not enough seats available on this trip")
 
         booking_id = str(uuid.uuid4())
@@ -55,13 +70,19 @@ class BookingService:
     async def confirm_payment_and_issue_ticket(
         db: AsyncSession, passenger_id: str, payment_req: PaymentSimulationRequest
     ) -> Payment:
-        # Check idempotency
-        stmt_idem = select(Payment).where(Payment.idempotency_key == payment_req.idempotency_key)
+        # 1. Check idempotency and verify it belongs to the caller
+        stmt_idem = (
+            select(Payment)
+            .where(Payment.idempotency_key == payment_req.idempotency_key)
+            .options(selectinload(Payment.booking))
+        )
         existing_payment = (await db.execute(stmt_idem)).scalar_one_or_none()
         if existing_payment:
+            if existing_payment.booking.passenger_id != passenger_id:
+                raise ForbiddenException("Idempotency key does not belong to caller")
             return existing_payment
 
-        # Fetch booking
+        # 2. Fetch booking
         stmt_b = (
             select(Booking)
             .where(Booking.id == payment_req.booking_id)
@@ -79,6 +100,7 @@ class BookingService:
 
         now = datetime.now(timezone.utc)
 
+        # 3. Simulate failure flow (allows retry)
         if payment_req.simulate_failure:
             payment = Payment(
                 id=str(uuid.uuid4()),
@@ -93,7 +115,26 @@ class BookingService:
             await db.commit()
             return payment
 
-        # Success flow:
+        # 4. Atomic capacity check and demand increment (single atomic UPDATE ... WHERE demand_count + n <= capacity)
+        from sqlalchemy import update
+        trip_id = booking.trip_id
+        seats_to_add = booking.seat_count
+
+        update_stmt = (
+            update(Trip)
+            .where(Trip.id == trip_id)
+            .where((Trip.demand_count + seats_to_add) <= Trip.capacity)
+            .values(
+                demand_count=Trip.demand_count + seats_to_add,
+                updated_at=now
+            )
+        )
+        update_result = await db.execute(update_stmt)
+        if update_result.rowcount == 0:
+            # Capacity exceeded
+            raise TripCapacityExceededException("Cannot confirm payment: trip capacity exceeded")
+
+        # Create successful payment
         payment = Payment(
             id=str(uuid.uuid4()),
             booking_id=booking.id,
@@ -110,17 +151,21 @@ class BookingService:
         booking.status = BookingStatus.CONFIRMED
         booking.updated_at = now
 
-        # Update trip demand count
-        trip = booking.trip
-        trip.demand_count += booking.seat_count
-        trip.updated_at = now
+        # Refresh trip to check threshold
+        trip = (await db.execute(select(Trip).where(Trip.id == trip_id))).scalar_one()
 
         # Check demand threshold for trip activation
-        if trip.status == TripStatus.AGGREGATING and trip.demand_count >= settings.DEMAND_ACTIVATION_THRESHOLD:
-            trip.status = TripStatus.THRESHOLD_MET
+        threshold = trip.min_threshold or settings.DEMAND_ACTIVATION_THRESHOLD
+        if trip.status == TripStatus.AGGREGATING and trip.demand_count >= threshold:
+            from app.services.state_machine import transition_trip_state
+            # Transition state machine to THRESHOLD_MET
+            await transition_trip_state(
+                db, trip.id, TripStatus.THRESHOLD_MET, performed_by=passenger_id, reason="Demand threshold met by confirmed booking"
+            )
 
-        # Issue ticket with QR code
-        await TicketService.issue_ticket_for_booking(db, booking)
+        # If trip is ALREADY SCHEDULED, issue ticket immediately!
+        if trip.status in [TripStatus.SCHEDULED, TripStatus.BOARDING]:
+            await TicketService.issue_ticket_for_booking(db, booking)
 
         await db.commit()
         await db.refresh(payment)
@@ -134,3 +179,4 @@ class BookingService:
             .order_by(Booking.created_at.desc())
         )
         return (await db.execute(stmt)).scalars().all()
+

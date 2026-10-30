@@ -11,7 +11,37 @@ from app.models.user import User
 from app.schemas.auth import TokenResponse, UserLogin, UserRegister
 
 
+# Rate limiting trackers: role -> dict(ip/email -> list of timestamps)
+_login_attempts: dict = {}
+
+ROLE_RATE_LIMITS = {
+    UserRole.OPERATOR: 30,    # 30 login attempts / minute
+    UserRole.ADMIN: 30,       # 30 login attempts / minute
+    UserRole.CONDUCTOR: 60,   # 60 login attempts / minute
+    UserRole.PASSENGER: 120,  # 120 login attempts / minute
+}
+
+
 class AuthService:
+    @staticmethod
+    def check_rate_limit(role: UserRole, key: str):
+        import time
+        now = time.time()
+        window = 60.0  # 1 minute
+        limit = ROLE_RATE_LIMITS.get(role, 60)
+
+        attempts = _login_attempts.setdefault(key, [])
+        # Prune old attempts
+        _login_attempts[key] = [t for t in attempts if now - t < window]
+
+        if len(_login_attempts[key]) >= limit:
+            raise DomainException(
+                status_code=429,
+                detail=f"Rate limit exceeded for {role.value} login. Maximum {limit} attempts per minute.",
+                error_code="RATE_LIMIT_EXCEEDED"
+            )
+        _login_attempts[key].append(now)
+
     @staticmethod
     async def register_user(db: AsyncSession, data: UserRegister) -> User:
         # Check existing email
@@ -52,7 +82,9 @@ class AuthService:
         user = (await db.execute(stmt)).scalar_one_or_none()
         if not user:
             raise DomainException(status_code=401, detail="Email not found. Please register first.", error_code="USER_NOT_FOUND")
-        # NOTE: Password check disabled — open access mode (demo/dev only)
+
+        # Apply per-role rate limit
+        AuthService.check_rate_limit(user.role, data.email)
 
         if not user.is_active:
             raise DomainException(status_code=403, detail="Account is disabled", error_code="INACTIVE_ACCOUNT")
@@ -67,3 +99,4 @@ class AuthService:
             email=user.email,
             full_name=user.full_name
         )
+

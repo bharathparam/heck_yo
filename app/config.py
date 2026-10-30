@@ -32,7 +32,6 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
-        "*"
     ]
 
     model_config = SettingsConfigDict(
@@ -42,5 +41,20 @@ class Settings(BaseSettings):
         extra="allow"
     )
 
+    @field_validator("SECRET_KEY", "QR_HMAC_SECRET")
+    @classmethod
+    def validate_secrets_in_production(cls, v: str, info) -> str:
+        # Check if running in production mode
+        # info.data might contain DEBUG
+        debug = info.data.get("DEBUG", True)
+        default_insecure = [
+            "railbus-production-jwt-secret-replace-in-env-key-928374928",
+            "railbus-qr-signature-secret-key-3847293847293847"
+        ]
+        if not debug and v in default_insecure:
+            raise ValueError(f"CRITICAL SECURITY: Cannot start with default {info.field_name} when DEBUG is false. Please configure {info.field_name} in environment variables.")
+        return v
+
 
 settings = Settings()
+
