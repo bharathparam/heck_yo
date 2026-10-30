@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta content="mobile_tab" name="shell-type"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-container": "#cad3ff",
+            "surface-dim": "#cbdbf5",
+            "primary-container": "#1d4ed8",
+            "on-surface-variant": "#434655",
+            "surface-tint": "#2151da",
+            "surface-container-low": "#eff4ff",
+            "on-secondary-fixed-variant": "#005320",
+            "background": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "on-error": "#ffffff",
+            "on-surface": "#0b1c30",
+            "tertiary": "#6b3700",
+            "primary-fixed": "#dce1ff",
+            "surface-container-lowest": "#ffffff",
+            "inverse-primary": "#b7c4ff",
+            "on-secondary-fixed": "#002109",
+            "surface-container": "#e5eeff",
+            "surface-variant": "#d3e4fe",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "inverse-surface": "#213145",
+            "tertiary-container": "#8d4b00",
+            "on-primary-fixed-variant": "#0039b5",
+            "tertiary-fixed": "#ffdcc3",
+            "outline-variant": "#c4c5d7",
+            "on-background": "#0b1c30",
+            "tertiary-fixed-dim": "#ffb77d",
+            "surface": "#f8f9ff",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed": "#001551",
+            "on-tertiary-container": "#ffcba3",
+            "on-tertiary-fixed": "#2f1500",
+            "secondary": "#006e2d",
+            "on-secondary": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "secondary-container": "#7cf994",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#7ffc97",
+            "primary": "#0037b0",
+            "secondary-fixed-dim": "#62df7d",
+            "outline": "#747686",
+            "on-primary": "#ffffff",
+            "on-secondary-container": "#007230",
+            "surface-container-highest": "#d3e4fe",
+            "error": "#ba1a1a",
+            "primary-fixed-dim": "#b7c4ff",
+            "surface-container-high": "#dce9ff"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    @layer base {
+      html, body {
+        width: 100vw;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9ff;
+        color: #0b1c30;
+        font-family: 'Inter', sans-serif;
+      }
+      body {
+        overscroll-behavior-y: none;
+      }
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="bg-background text-on-surface flex flex-col min-h-screen">
+<!-- Clean Fixed Header -->
+<header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest border-b border-slate-200/80 shadow-sm backdrop-blur-md">
+<!-- Compact Offline Banner -->
+<div class="bg-amber-50/90 border-b border-amber-200/60 text-amber-900 px-4 py-1.5 flex items-center justify-between text-xs font-medium">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+</span>
+<span>Offline Mode · 2 actions queued</span>
+</div>
+<div class="flex items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined text-[13px] animate-spin">sync</span>
+<span class="text-[11px] font-semibold uppercase tracking-wider">Sync Ready</span>
+</div>
+</div>
+<!-- Main Navigation Bar -->
+<div class="h-16 px-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="RailBus Transit Logo" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5E3kNiW8egltRcXHTlyfMVsDESVTEtr6qImf_mVbsVv26y9MzqKr7l_FK9tgLTJSinI1rRajqR-K-9YcufW45J9eVttAmiKjc7-E5K1i8QTVQTQezVwFxexPIlVCmJeYTFw6rFQGk3QoBRPiKNEMnGjS5j9FOQgQkCLFZOzPALvxLFrhdA9yFaagkZFZQVN-azMSavEkZ-VyhCXuptczgEJUTkqJOeaCMMjk0y-gl"/>
+<div class="flex flex-col">
+<h1 class="text-base font-bold text-slate-900 tracking-tight leading-tight">My Trips</h1>
+<span class="text-xs text-slate-500 font-medium">Ravi Kumar · ID #RB-804</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-9 h-9 rounded-full bg-blue-50 border border-blue-200/60 text-primary flex items-center justify-center transition-colors active:bg-blue-100">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Scrollable Content Area -->
+<main class="flex flex-col relative w-full pt-28 pb-28 min-h-screen px-4 max-w-lg mx-auto space-y-4">
+<!-- Duty Overview Card -->
+<div class="w-full bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm flex items-center justify-between gap-3">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5 mb-0.5">
+<span class="text-[11px] font-bold uppercase tracking-wider text-primary">Shift Active</span>
+<span class="text-slate-300">•</span>
+<span class="text-xs text-slate-500">Depot Koyambedu #04</span>
+</div>
+<div class="text-lg font-bold text-slate-900">Good morning, Ravi</div>
+<span class="text-xs text-slate-500">Morning Express Shift #SH-102</span>
+</div>
+<div class="w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Transit express coach" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA63SGTJDAhJ5r-qZQohQ_swMZ76ZKnAw7rtJvk8SROcHzxfBlMUSfYZqCtetZUK3SEniDGus472vmBebuWXrvDry55OdeSNRTTaLoHb8q5b0bC_NikTYNJjskF8UYTs6tHCbN0unIwJ0Gbo2Z4WTGv70a9xE_NXfGSaJ-9RxltoBL7FfWohHKZrET2KQ2BABo3Ww1NIgoUCNnybmeq_6TZ4Ev7JdxuqAYa9S-Dnp3I"/>
+</div>
+</div>
+<!-- Date Filter Tabs -->
+<div class="flex items-center gap-2 overflow-x-auto py-0.5 no-scrollbar">
+<button class="tab-btn px-4 py-2 rounded-full text-xs font-semibold bg-primary text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap" id="tab-today" onclick="filterTrips('today')">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">today</span>
+<span>Today (01 Nov)</span>
+</button>
+<button class="tab-btn px-4 py-2 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 flex items-center gap-1.5 whitespace-nowrap" id="tab-tomorrow" onclick="filterTrips('tomorrow')">
+<span class="material-symbols-outlined text-[15px]">event</span>
+<span>Tomorrow (02 Nov)</span>
+</button>
+<button class="tab-btn px-4 py-2 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 flex items-center gap-1.5 whitespace-nowrap" id="tab-past" onclick="filterTrips('past')">
+<span class="material-symbols-outlined text-[15px]">history</span>
+<span>Past Trips</span>
+</button>
+</div>
+<!-- Trips Feed -->
+<div class="flex flex-col space-y-3.5">
+<!-- 1. Active Trip Card -->
+<div class="trip-card bg-white rounded-xl border border-slate-200/90 shadow-sm overflow-hidden" data-category="today">
+<!-- Status Header -->
+<div class="px-4 py-2.5 bg-emerald-50/80 border-b border-emerald-100 flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-emerald-800">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+</span>
+<span class="text-xs font-bold uppercase tracking-wide">Boarding Active</span>
+</div>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-white text-emerald-800 border border-emerald-200/60">Bay 12-A</span>
+</div>
+<div class="p-4 space-y-3.5">
+<!-- Route Header -->
+<div class="flex items-start justify-between">
+<div class="space-y-0.5">
+<div class="text-base font-bold text-slate-900 leading-snug">Chennai Koyambedu → Bengaluru Majestic</div>
+<div class="text-xs text-slate-500 font-medium">NH-48 Express Corridor • TN-09-AB-1234</div>
+</div>
+<span class="text-xs font-bold px-2 py-1 bg-blue-50 text-primary rounded-md border border-blue-100 shrink-0">AC Sleeper</span>
+</div>
+<!-- Schedule & Timing -->
+<div class="flex items-center justify-between text-xs py-2 px-3 bg-slate-50 rounded-lg border border-slate-100">
+<div class="flex items-center gap-1.5 text-slate-700">
+<span class="material-symbols-outlined text-slate-400 text-[16px]">schedule</span>
+<span class="font-medium">Departure:</span>
+<span class="font-bold text-slate-900">09:00 AM</span>
+</div>
+<span class="font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/50">In 18m</span>
+</div>
+<!-- Boarding Progress Minimal Meter -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-xs">
+<span class="text-slate-600 font-medium">Passenger Boarding</span>
+<span class="font-bold text-emerald-700">14 / 22 Boarded (64%)</span>
+</div>
+<div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full transition-all duration-300" style="width: 64%;"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+<span>8 awaiting boarding</span>
+<span>23 seats vacant</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="grid grid-cols-2 gap-2.5 pt-1">
+<button class="h-12 bg-primary hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 text-xs font-bold shadow-sm active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[18px]">qr_code_scanner</span>
+<span>Open Scanner</span>
+</button>
+<button class="h-12 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg flex items-center justify-center gap-2 text-xs font-semibold active:scale-[0.98] transition-all border border-slate-200/60">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Trip Overview</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 2. Upcoming Return Leg Trip Card -->
+<div class="trip-card bg-white rounded-xl border border-slate-200/90 shadow-sm overflow-hidden" data-category="today">
+<div class="px-4 py-2.5 bg-blue-50/70 border-b border-blue-100 flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="text-xs font-bold uppercase tracking-wide">Return Leg · Scheduled</span>
+</div>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">Platform 04</span>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-start justify-between">
+<div class="space-y-0.5">
+<div class="text-base font-bold text-slate-900 leading-snug">Bengaluru Majestic → Chennai Koyambedu</div>
+<div class="text-xs text-slate-500 font-medium">Assigned Coach: TN-09-AB-1234 (45 Seater)</div>
+</div>
+<span class="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-700 rounded-md shrink-0">EV Express</span>
+</div>
+<div class="flex items-center justify-between text-xs py-2 px-3 bg-slate-50 rounded-lg border border-slate-100">
+<div class="flex items-center gap-1.5 text-slate-700">
+<span class="material-symbols-outlined text-slate-400 text-[16px]">badge</span>
+<span class="font-medium">Reporting Time:</span>
+<span class="font-bold text-slate-900">05:30 PM Today</span>
+</div>
+<span class="text-xs font-semibold text-emerald-700">Manifest Ready</span>
+</div>
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-xs">
+<span class="text-slate-600 font-medium">Confirmed Bookings</span>
+<span class="font-bold text-primary">24 / 45 Booked</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 53%;"></div>
+</div>
+</div>
+<button class="w-full h-11 bg-white hover:bg-slate-50 text-slate-800 rounded-lg flex items-center justify-center gap-2 text-xs font-semibold border border-slate-200 transition-all active:scale-[0.99]">
+<span class="material-symbols-outlined text-[17px] text-slate-500">receipt_long</span>
+<span>View Trip Details</span>
+</button>
+</div>
+</div>
+<!-- 3. Completed Trip Card -->
+<div class="trip-card bg-white rounded-xl border border-slate-200/90 shadow-sm p-4 space-y-2.5 opacity-85" data-category="past">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-emerald-700 text-xs font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Completed &amp; Synced</span>
+</div>
+<span class="text-xs text-slate-400">Archive #4092</span>
+</div>
+<div class="flex items-start justify-between">
+<div>
+<div class="text-sm font-bold text-slate-800">Salem Junction → Chennai Central</div>
+<div class="text-xs text-slate-500">Yesterday, 31 Oct · 04:00 PM</div>
+</div>
+<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">22/22 (100%)</span>
+</div>
+</div>
+</div>
+<!-- Minimal Duty & Helpline Footer -->
+<div class="w-full bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm text-xs flex items-center justify-between">
+<div class="flex items-center gap-2 text-slate-600">
+<span class="material-symbols-outlined text-primary text-[18px]">support_agent</span>
+<span>Emergency Dispatch:</span>
+</div>
+<a class="font-bold text-primary hover:underline" href="tel:+914428360000">+91 44 2836 0000</a>
+</div>
+</main>
+<!-- Clean Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 pb-safe bg-white border-t border-slate-200/90 shadow-lg">
+<div class="flex items-center justify-around h-16 px-2 max-w-md mx-auto">
+<a aria-current="page" class="flex flex-col items-center justify-center min-w-[64px] text-primary transition-colors" data-path="my-trips" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">directions_bus</span>
+<span class="text-[11px] font-bold mt-0.5">My Trips</span>
+</a>
+<a class="flex flex-col items-center justify-center min-w-[64px] text-slate-500 hover:text-slate-900 transition-colors" data-path="trip-overview" href="#">
+<span class="material-symbols-outlined text-[24px]">speed</span>
+<span class="text-[11px] font-medium mt-0.5">Overview</span>
+</a>
+<a class="flex flex-col items-center justify-center min-w-[64px] -mt-5" data-path="qr-scan" href="#">
+<div class="w-13 h-13 p-3 rounded-full bg-primary text-white flex items-center justify-center shadow-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[26px]">qr_code_scanner</span>
+</div>
+<span class="text-[11px] font-semibold text-primary mt-1">QR Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center min-w-[64px] text-slate-500 hover:text-slate-900 transition-colors relative" data-path="manifest" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-[24px]">fact_check</span>
+<span class="absolute -top-1 -right-2 bg-emerald-600 text-white text-[10px] px-1 py-0.2 rounded-full font-bold leading-none">48</span>
+</div>
+<span class="text-[11px] font-medium mt-0.5">Manifest</span>
+</a>
+</div>
+</nav>
+<script>
+    function filterTrips(tab) {
+      const tabs = ['today', 'tomorrow', 'past'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-' + t);
+        if (!btn) return;
+        if (t === tab) {
+          btn.className = "tab-btn px-4 py-2 rounded-full text-xs font-semibold bg-primary text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap";
+        } else {
+          btn.className = "tab-btn px-4 py-2 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 flex items-center gap-1.5 whitespace-nowrap";
+        }
+      });
+
+      const cards = document.querySelectorAll('.trip-card');
+      cards.forEach(card => {
+        const category = card.getAttribute('data-category');
+        if (tab === 'today') {
+          card.style.display = 'block';
+        } else if (tab === 'tomorrow') {
+          if (category === 'today') card.style.display = 'block';
+          else card.style.display = 'none';
+        } else if (tab === 'past') {
+          if (category === 'past') card.style.display = 'block';
+          else card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body></html>

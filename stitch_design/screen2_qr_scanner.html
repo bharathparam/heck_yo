@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta content="mobile_tab" name="shell-type"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-container": "#cad3ff",
+            "surface-dim": "#cbdbf5",
+            "primary-container": "#1d4ed8",
+            "on-surface-variant": "#434655",
+            "surface-tint": "#2151da",
+            "surface-container-low": "#eff4ff",
+            "on-secondary-fixed-variant": "#005320",
+            "background": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "on-error": "#ffffff",
+            "on-surface": "#0b1c30",
+            "tertiary": "#6b3700",
+            "primary-fixed": "#dce1ff",
+            "surface-container-lowest": "#ffffff",
+            "inverse-primary": "#b7c4ff",
+            "on-secondary-fixed": "#002109",
+            "surface-container": "#e5eeff",
+            "surface-variant": "#d3e4fe",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "inverse-surface": "#213145",
+            "tertiary-container": "#8d4b00",
+            "on-primary-fixed-variant": "#0039b5",
+            "tertiary-fixed": "#ffdcc3",
+            "outline-variant": "#c4c5d7",
+            "on-background": "#0b1c30",
+            "tertiary-fixed-dim": "#ffb77d",
+            "surface": "#f8f9ff",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed": "#001551",
+            "on-tertiary-container": "#ffcba3",
+            "on-tertiary-fixed": "#2f1500",
+            "secondary": "#006e2d",
+            "on-secondary": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "secondary-container": "#7cf994",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#7ffc97",
+            "primary": "#0037b0",
+            "secondary-fixed-dim": "#62df7d",
+            "outline": "#747686",
+            "on-primary": "#ffffff",
+            "on-secondary-container": "#007230",
+            "surface-container-highest": "#d3e4fe",
+            "error": "#ba1a1a",
+            "primary-fixed-dim": "#b7c4ff",
+            "surface-container-high": "#dce9ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "gutter": "1rem",
+            "margin": "1rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-xl": "1.5rem",
+            "space-md": "0.75rem",
+            "margin-mobile": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "body-sm": ["Inter"],
+            "code-telemetry": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-md": ["Inter"],
+            "display-lg": ["Inter"],
+            "label-lg": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { lineHeight: "30px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "label-sm": ["10px", { lineHeight: "12px", letterSpacing: "0.05em", fontWeight: "700" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+            "code-telemetry": ["14px", { lineHeight: "18px", letterSpacing: "0.04em", fontWeight: "500" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "headline-sm": ["16px", { lineHeight: "22px", fontWeight: "600" }],
+            "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
+            "headline-md": ["20px", { lineHeight: "26px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "display-lg": ["32px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body {
+        width: 100vw;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9ff;
+        color: #0b1c30;
+      }
+      body {
+        overscroll-behavior-y: none;
+      }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+      .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background font-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-container selection:text-white">
+<!-- Top Offline Status & Header Bar -->
+<header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest border-b border-surface-container shadow-xs">
+<!-- Subtle Offline Notification Pill -->
+<div class="bg-amber-50 text-amber-900 border-b border-amber-200/60 px-gutter py-1 flex items-center justify-between text-xs font-medium">
+<div class="flex items-center gap-1.5">
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-amber-600"></span>
+</span>
+<span class="font-semibold text-amber-950">Offline Mode</span>
+<span class="text-amber-700">· 2 actions queued</span>
+</div>
+<div class="flex items-center gap-1 text-amber-800">
+<span class="material-symbols-outlined text-[13px] animate-spin">sync</span>
+<span class="text-[11px] font-semibold uppercase tracking-wider">Local Queue</span>
+</div>
+</div>
+<!-- Header Navigation & Conductor Badge -->
+<div class="h-16 px-gutter flex items-center justify-between gap-space-sm bg-surface-container-lowest">
+<div class="flex items-center gap-2.5 min-w-0">
+<img alt="RailBus Transit Logo" class="h-7 w-auto object-contain shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5E3kNiW8egltRcXHTlyfMVsDESVTEtr6qImf_mVbsVv26y9MzqKr7l_FK9tgLTJSinI1rRajqR-K-9YcufW45J9eVttAmiKjc7-E5K1i8QTVQTQezVwFxexPIlVCmJeYTFw6rFQGk3QoBRPiKNEMnGjS5j9FOQgQkCLFZOzPALvxLFrhdA9yFaagkZFZQVN-azMSavEkZ-VyhCXuptczgEJUTkqJOeaCMMjk0y-gl"/>
+<div class="flex flex-col min-w-0">
+<span class="text-[10px] font-bold text-primary tracking-widest uppercase truncate">QR Validation</span>
+<span class="text-sm font-bold text-on-surface truncate">Ravi Kumar · ID #RB-804</span>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<div class="w-8 h-8 rounded-full bg-surface-container-low border border-outline-variant/40 flex items-center justify-center text-primary font-semibold text-xs">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Viewport -->
+<main class="flex flex-col relative w-full pt-24 pb-24 bg-background min-h-screen">
+<div class="flex flex-col w-full px-gutter space-y-3 pt-2">
+<!-- Active Route Context Chip -->
+<div class="bg-surface-container-lowest border border-surface-container rounded-xl p-3 flex items-center justify-between shadow-xs">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">directions_bus</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="text-[11px] font-bold text-primary tracking-wide uppercase">TN-09-AB-1234</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="text-[11px] font-medium text-secondary">Coach 02</span>
+</div>
+<span class="text-sm font-semibold text-on-surface truncate">Chennai ➔ Bangalore (09:00 AM)</span>
+</div>
+</div>
+<button class="bg-surface-container-low hover:bg-surface-container text-primary font-semibold text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-colors shrink-0" id="viewQueueBtn">
+<span class="material-symbols-outlined text-[15px]">pending_actions</span>
+<span>Queue (2)</span>
+</button>
+</div>
+<!-- State Simulation Switcher (Clean Segmented Control) -->
+<div class="flex items-center bg-surface-container-low p-1 rounded-xl border border-surface-container/80">
+<button class="state-pill flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition-all bg-surface-container-lowest text-secondary shadow-xs" data-sim="valid" type="button">
+          Valid
+        </button>
+<button class="state-pill flex-1 py-1.5 px-2 rounded-lg text-xs font-medium text-center text-on-surface-variant hover:text-on-surface transition-all" data-sim="duplicate" type="button">
+          Already Boarded
+        </button>
+<button class="state-pill flex-1 py-1.5 px-2 rounded-lg text-xs font-medium text-center text-on-surface-variant hover:text-on-surface transition-all" data-sim="invalid" type="button">
+          Wrong Trip
+        </button>
+</div>
+<!-- Camera Viewfinder Visual Module (Focused high-contrast viewport surrounded by clean chrome) -->
+<div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md flex flex-col items-center justify-center" style="height: 250px;">
+<!-- Simulated Camera Feed Live Texture -->
+<div class="absolute inset-0 bg-cover bg-center opacity-50 mix-blend-luminosity scale-105 filter blur-[0.4px]" data-alt="High-contrast POV camera feed looking at a printed passenger QR boarding pass on heavy paper inside a modern intercity train station passenger cabin, muted navy and cool slate ambient shadows with dramatic rim lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDSGgF3qYSdymm-jLWpWBCcm5YnDL2KYUGdkOGMy5_smQGCoIuE_MPmUP-3A2qC-YhMWY6eYnD2F-0jyb6Vi2f5dk1Z9L-jpRy2_kHxtYogRAO0a5vKQeC1rZAwVQNhiFaApph7XYfYaTl8dhrg_GAM310tlBpxPZz0pT2OTlFtro9uyBK3h4tK7Lcsulb9rjP48RFLTqWVSI5qtJDKLSAk8fnNHU4kNY_n7vjaNhlR')"></div>
+<!-- Scrim -->
+<div class="absolute inset-0 bg-radial from-transparent via-slate-950/40 to-slate-950/80"></div>
+<!-- Hardware Controls Overlay -->
+<div class="absolute top-2.5 left-3 right-3 flex items-center justify-between z-20">
+<div class="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full text-slate-200 border border-slate-700/50">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+<span class="text-[10px] font-semibold tracking-wider uppercase text-slate-300">AUTO-FOCUS</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center backdrop-blur-md border border-slate-700/50 active:scale-95 transition-all" id="torchToggle">
+<span class="material-symbols-outlined text-[17px]" id="torchIcon">flashlight_on</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center backdrop-blur-md border border-slate-700/50 active:scale-95 transition-all" id="cameraFlip">
+<span class="material-symbols-outlined text-[17px]">flip_camera_ios</span>
+</button>
+</div>
+</div>
+<!-- Reticle Frame & Laser Scanline -->
+<div class="relative w-44 h-44 z-10 flex items-center justify-center transition-transform duration-300" id="reticleBox">
+<!-- Target Corner Brackets -->
+<div class="absolute top-0 left-0 w-6 h-6 border-t-[3px] border-l-[3px] border-emerald-400 rounded-tl-sm transition-colors" id="cornerTL"></div>
+<div class="absolute top-0 right-0 w-6 h-6 border-t-[3px] border-r-[3px] border-emerald-400 rounded-tr-sm transition-colors" id="cornerTR"></div>
+<div class="absolute bottom-0 left-0 w-6 h-6 border-b-[3px] border-l-[3px] border-emerald-400 rounded-bl-sm transition-colors" id="cornerBL"></div>
+<div class="absolute bottom-0 right-0 w-6 h-6 border-b-[3px] border-r-[3px] border-emerald-400 rounded-br-sm transition-colors" id="cornerBR"></div>
+<!-- Center Targeting Crosshairs -->
+<div class="w-3 h-0.5 bg-emerald-400/40 absolute"></div>
+<div class="h-3 w-0.5 bg-emerald-400/40 absolute"></div>
+<!-- Animated High-Speed Laser Scanline -->
+<div class="absolute left-1 right-1 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_8px_#34d399] animate-[scannerBeam_2.2s_ease-in-out_infinite]"></div>
+<!-- Code Type Tag -->
+<div class="absolute bottom-2 text-[10px] font-mono tracking-widest text-emerald-300 bg-slate-950/80 px-2 py-0.5 rounded border border-emerald-500/20">
+            QR · AZTEC
+          </div>
+</div>
+<div class="absolute bottom-2 z-20 text-center">
+<span class="text-[11px] font-medium text-slate-300 bg-slate-900/80 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-slate-800">
+            Align passenger QR in frame
+          </span>
+</div>
+</div>
+<!-- Real-Time Verification Result Card (High-contrast clean white surface) -->
+<div class="bg-surface-container-lowest text-on-surface rounded-xl border border-surface-container shadow-sm overflow-hidden transition-all duration-300" id="resultCard">
+<!-- Verification Header Ribbon -->
+<div class="bg-emerald-600 text-white px-4 py-2.5 flex items-center justify-between transition-colors" id="statusRibbon">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" id="statusIcon">check_circle</span>
+<span class="text-xs font-bold tracking-wide uppercase" id="statusTitle">VALID TICKET · READY TO BOARD</span>
+</div>
+<span class="bg-white/20 backdrop-blur-xs text-white text-[11px] px-2 py-0.5 rounded-full uppercase font-bold" id="fareBadge">
+            Reserved
+          </span>
+</div>
+<!-- Passenger Metadata & Details -->
+<div class="p-4 space-y-3.5">
+<div class="flex items-start justify-between gap-3">
+<div class="min-w-0">
+<span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase block">PASSENGER NAME</span>
+<h2 class="text-xl font-bold text-on-surface tracking-tight truncate mt-0.5" id="passengerName">Arjun Sharma</h2>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-mono text-xs font-semibold text-primary" id="ticketId">RB-20261101-0042</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="text-xs text-on-surface-variant font-medium" id="fareType">Adult Express</span>
+</div>
+</div>
+<!-- Prominent Clean Seat Badge -->
+<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex flex-col items-center justify-center shrink-0 min-w-[76px]">
+<span class="text-[10px] font-bold text-emerald-800 tracking-wider uppercase">SEAT</span>
+<span class="text-2xl font-bold text-emerald-700 leading-none my-0.5" id="seatNumber">14B</span>
+<span class="text-[11px] font-medium text-emerald-800" id="seatDetail">Window</span>
+</div>
+</div>
+<!-- Route & Fare Summary Single Line -->
+<div class="bg-surface-container-low rounded-lg p-2.5 flex items-center justify-between text-xs border border-surface-container">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-[16px] text-primary shrink-0">location_on</span>
+<span class="text-on-surface font-medium truncate">Platform 04 · 09:00 AM · Paid Online</span>
+</div>
+<span class="font-bold text-emerald-800 shrink-0">₹680.00</span>
+</div>
+<!-- Actions CTA Buttons -->
+<div class="space-y-2 pt-0.5">
+<button class="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] transition-all" id="confirmBtn">
+<span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+<span id="confirmBtnText">Confirm Boarding</span>
+</button>
+<button class="w-full h-10 bg-transparent hover:bg-surface-container-low text-on-surface-variant hover:text-on-surface border border-outline-variant/60 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all" id="rescanBtn">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+<span>Scan Next</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Offline Actions Streamlined Single-Line Card -->
+<div class="bg-surface-container-lowest border border-surface-container rounded-xl px-3.5 py-2.5 flex items-center justify-between shadow-xs">
+<div class="flex items-center gap-2 min-w-0">
+<span class="flex h-2 w-2 relative shrink-0">
+<span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+</span>
+<span class="text-xs text-on-surface-variant truncate">
+<strong class="text-on-surface font-semibold" id="queueBadgeCount">2 scans</strong> queued locally · Auto-sync active
+          </span>
+</div>
+<button class="text-primary hover:text-primary-container text-xs font-semibold flex items-center gap-1 shrink-0 px-2 py-1 rounded hover:bg-surface-container-low transition-colors" id="forceSyncBtn">
+<span class="material-symbols-outlined text-[14px]">cloud_upload</span>
+<span>Sync Now</span>
+</button>
+</div>
+<!-- Field Quick Stats Bento (Clean Light Cards) -->
+<div class="grid grid-cols-3 gap-2">
+<div class="bg-surface-container-lowest border border-surface-container rounded-xl p-2.5 flex flex-col items-center justify-center text-center shadow-xs">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wide">BOARDED</span>
+<span class="text-base font-bold text-secondary mt-0.5">38 / 48</span>
+<span class="text-[10px] text-on-surface-variant font-medium">79% full</span>
+</div>
+<div class="bg-surface-container-lowest border border-surface-container rounded-xl p-2.5 flex flex-col items-center justify-center text-center shadow-xs">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wide">REMAINING</span>
+<span class="text-base font-bold text-tertiary mt-0.5">10</span>
+<span class="text-[10px] text-on-surface-variant font-medium">Next Stn</span>
+</div>
+<div class="bg-surface-container-lowest border border-surface-container rounded-xl p-2.5 flex flex-col items-center justify-center text-center shadow-xs">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wide">BATTERY</span>
+<span class="text-base font-bold text-on-surface mt-0.5">84%</span>
+<span class="text-[10px] text-secondary font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]">bolt</span> OK
+          </span>
+</div>
+</div>
+</div>
+<!-- Inline Script for Light Theme State Changes & Interactions -->
+<script>
+      (function() {
+        const states = {
+          valid: {
+            ribbonBg: 'bg-emerald-600',
+            ribbonText: 'text-white',
+            icon: 'check_circle',
+            title: 'VALID TICKET · READY TO BOARD',
+            badge: 'Reserved',
+            badgeClass: 'bg-white/20 text-white',
+            passenger: 'Arjun Sharma',
+            ticketId: 'RB-20261101-0042',
+            fareType: 'Adult Express',
+            seat: '14B',
+            seatColor: 'text-emerald-700',
+            seatDetail: 'Window',
+            btnBg: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+            btnText: 'Confirm Boarding',
+            reticleBorder: '#34d399'
+          },
+          duplicate: {
+            ribbonBg: 'bg-amber-600',
+            ribbonText: 'text-white',
+            icon: 'warning',
+            title: 'ALREADY BOARDED · DUPLICATE PASS',
+            badge: 'Duplicate',
+            badgeClass: 'bg-white/20 text-white',
+            passenger: 'Vikas Mehra',
+            ticketId: 'RB-20261101-0019',
+            fareType: 'Validated 08:42 AM',
+            seat: '08C',
+            seatColor: 'text-amber-700',
+            seatDetail: 'Aisle',
+            btnBg: 'bg-amber-600 hover:bg-amber-700 text-white',
+            btnText: 'Override & Permit Boarding',
+            reticleBorder: '#fbbf24'
+          },
+          invalid: {
+            ribbonBg: 'bg-rose-600',
+            ribbonText: 'text-white',
+            icon: 'cancel',
+            title: 'WRONG TRIP · ROUTE MISMATCH',
+            badge: 'Invalid',
+            badgeClass: 'bg-white/20 text-white',
+            passenger: 'Sanya Pillai',
+            ticketId: 'RB-20261101-9904',
+            fareType: 'TN-02-CD-5678 (11:30 AM)',
+            seat: '22A',
+            seatColor: 'text-rose-700',
+            seatDetail: 'Window',
+            btnBg: 'bg-rose-600 hover:bg-rose-700 text-white',
+            btnText: 'Reject & Issue Penalty Fare',
+            reticleBorder: '#f87171'
+          }
+        };
+
+        const pills = document.querySelectorAll('.state-pill');
+        const ribbon = document.getElementById('statusRibbon');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusTitle = document.getElementById('statusTitle');
+        const fareBadge = document.getElementById('fareBadge');
+        const passengerName = document.getElementById('passengerName');
+        const ticketId = document.getElementById('ticketId');
+        const fareType = document.getElementById('fareType');
+        const seatNumber = document.getElementById('seatNumber');
+        const seatDetail = document.getElementById('seatDetail');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const confirmBtnText = document.getElementById('confirmBtnText');
+        const reticleCorners = ['cornerTL', 'cornerTR', 'cornerBL', 'cornerBR'].map(id => document.getElementById(id));
+
+        pills.forEach(pill => {
+          pill.addEventListener('click', () => {
+            pills.forEach(p => {
+              p.className = 'state-pill flex-1 py-1.5 px-2 rounded-lg text-xs font-medium text-center text-on-surface-variant hover:text-on-surface transition-all';
+            });
+
+            const simKey = pill.getAttribute('data-sim');
+            const st = states[simKey];
+
+            pill.className = 'state-pill flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition-all bg-surface-container-lowest text-on-surface shadow-xs';
+
+            // Apply Ribbon Theme
+            ribbon.className = `${st.ribbonBg} ${st.ribbonText} px-4 py-2.5 flex items-center justify-between transition-colors`;
+            statusIcon.textContent = st.icon;
+            statusTitle.textContent = st.title;
+            fareBadge.textContent = st.badge;
+            fareBadge.className = `${st.badgeClass} backdrop-blur-xs text-[11px] px-2 py-0.5 rounded-full uppercase font-bold`;
+
+            passengerName.textContent = st.passenger;
+            ticketId.textContent = st.ticketId;
+            fareType.textContent = st.fareType;
+
+            seatNumber.textContent = st.seat;
+            seatNumber.className = `text-2xl font-bold leading-none my-0.5 ${st.seatColor}`;
+            seatDetail.textContent = st.seatDetail;
+
+            confirmBtn.className = `w-full h-12 ${st.btnBg} font-semibold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] transition-all`;
+            confirmBtnText.textContent = st.btnText;
+
+            reticleCorners.forEach(c => {
+              if (c) c.style.borderColor = st.reticleBorder;
+            });
+          });
+        });
+
+        // Torch Light Interaction
+        const torchBtn = document.getElementById('torchToggle');
+        const torchIcon = document.getElementById('torchIcon');
+        let torchOn = false;
+        torchBtn.addEventListener('click', () => {
+          torchOn = !torchOn;
+          if (torchOn) {
+            torchBtn.classList.add('bg-amber-500', 'text-slate-950');
+            torchBtn.classList.remove('bg-slate-900/80', 'text-white');
+            torchIcon.textContent = 'flashlight_off';
+          } else {
+            torchBtn.classList.remove('bg-amber-500', 'text-slate-950');
+            torchBtn.classList.add('bg-slate-900/80', 'text-white');
+            torchIcon.textContent = 'flashlight_on';
+          }
+        });
+
+        // Flip Camera Feedback
+        const flipBtn = document.getElementById('cameraFlip');
+        flipBtn.addEventListener('click', () => {
+          const box = document.getElementById('reticleBox');
+          box.classList.add('scale-95');
+          setTimeout(() => box.classList.remove('scale-95'), 180);
+        });
+
+        // Confirm Action Feedback
+        const queueBadge = document.getElementById('queueBadgeCount');
+        let queueCount = 2;
+        confirmBtn.addEventListener('click', () => {
+          confirmBtn.classList.add('scale-95');
+          setTimeout(() => confirmBtn.classList.remove('scale-95'), 150);
+          queueCount += 1;
+          queueBadge.textContent = `${queueCount} scans`;
+          confirmBtnText.textContent = '✓ Boarding Logged Locally';
+          setTimeout(() => {
+            confirmBtnText.textContent = 'Confirm Boarding';
+          }, 1400);
+        });
+
+        // Rescan Action Feedback
+        const rescanBtn = document.getElementById('rescanBtn');
+        rescanBtn.addEventListener('click', () => {
+          const card = document.getElementById('resultCard');
+          card.classList.add('opacity-40');
+          setTimeout(() => {
+            card.classList.remove('opacity-40');
+          }, 250);
+        });
+
+        // Force Sync Action Feedback
+        const forceSyncBtn = document.getElementById('forceSyncBtn');
+        forceSyncBtn.addEventListener('click', () => {
+          const originalHTML = forceSyncBtn.innerHTML;
+          forceSyncBtn.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">refresh</span><span>Syncing...</span>';
+          setTimeout(() => {
+            forceSyncBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span><span>Up to date</span>';
+            setTimeout(() => {
+              forceSyncBtn.innerHTML = originalHTML;
+            }, 1800);
+          }, 1100);
+        });
+      })();
+    </script>
+</main>
+<!-- Clean Light Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest border-t border-surface-container shadow-sm" data-active-classes="text-primary font-semibold">
+<div class="flex items-center justify-around h-16 px-space-xs max-w-md mx-auto">
+<a class="flex flex-col items-center justify-center min-w-[60px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="my-trips" href="#">
+<span class="material-symbols-outlined text-[22px]">directions_bus</span>
+<span class="text-[11px] font-medium mt-0.5">My Trips</span>
+</a>
+<a class="flex flex-col items-center justify-center min-w-[60px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="trip-overview" href="#">
+<span class="material-symbols-outlined text-[22px]">speed</span>
+<span class="text-[11px] font-medium mt-0.5">Overview</span>
+</a>
+<a aria-current="page" class="flex flex-col items-center justify-center min-w-[64px] -mt-5 text-primary" data-path="qr-scan" href="#">
+<div class="w-12 h-12 rounded-full bg-primary-container text-white flex items-center justify-center shadow-md shadow-blue-500/30 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[26px]">qr_code_scanner</span>
+</div>
+<span class="text-[11px] font-bold text-primary mt-1">QR Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center min-w-[60px] text-on-surface-variant hover:text-on-surface transition-colors relative" data-path="manifest" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-[22px]">fact_check</span>
+<span class="absolute -top-1 -right-2 bg-secondary text-white text-[9px] px-1 py-0.2 rounded-full font-bold leading-none">48</span>
+</div>
+<span class="text-[11px] font-medium mt-0.5">Manifest</span>
+</a>
+</div>
+</nav>
+</body></html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta content="mobile_tab" name="shell-type"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#f8f9ff",
+            "surface-dim": "#cbdbf5",
+            "surface-bright": "#f8f9ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#eff4ff",
+            "surface-container": "#e5eeff",
+            "surface-container-high": "#dce9ff",
+            "surface-container-highest": "#d3e4fe",
+            "surface-variant": "#d3e4fe",
+            "on-surface": "#0b1c30",
+            "on-surface-variant": "#434655",
+            "primary": "#0037b0",
+            "primary-container": "#1d4ed8",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#cad3ff",
+            "secondary": "#006e2d",
+            "secondary-container": "#e6f8ec",
+            "on-secondary-container": "#007230",
+            "tertiary": "#8d4b00",
+            "tertiary-container": "#fef3e9",
+            "outline": "#747686",
+            "outline-variant": "#e2e8f0",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.375rem",
+            xl: "0.75rem",
+            "2xl": "1rem",
+            full: "9999px"
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @layer base {
+      html, body {
+        width: 100vw;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        color: #0b1c30;
+      }
+      body {
+        overscroll-behavior-y: none;
+      }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+      .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="bg-[#f8fafc] font-sans text-slate-900 flex flex-col min-h-screen selection:bg-blue-100 selection:text-blue-900">
+<!-- Header & Compact Offline Status Banner -->
+<header class="fixed top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+<!-- Non-intrusive Minimal Offline Pill -->
+<div class="bg-amber-50/90 border-b border-amber-200/60 px-4 py-1.5 flex items-center justify-between text-xs text-amber-900 font-medium">
+<div class="flex items-center gap-2">
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-amber-600"></span>
+</span>
+<span>Offline Mode · 2 actions queued</span>
+</div>
+<div class="flex items-center gap-1 text-[11px] font-semibold text-amber-800 tracking-wide uppercase">
+<span class="material-symbols-outlined text-[14px] animate-spin">sync</span>
+<span>Local Cache</span>
+</div>
+</div>
+<!-- App Header -->
+<div class="h-16 px-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold border border-blue-100">
+<span class="material-symbols-outlined text-[20px]">directions_subway</span>
+</div>
+<div>
+<span class="text-[10px] font-bold text-blue-700 tracking-widest uppercase block leading-none">Manifest</span>
+<h1 class="text-sm font-semibold text-slate-900 mt-0.5">Ravi Kumar · ID #RB-804</h1>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+</div>
+</header>
+<!-- Main Manifest Content -->
+<main class="flex flex-col relative w-full pt-28 pb-28 min-h-screen px-4">
+<div class="max-w-md mx-auto w-full flex flex-col gap-4">
+<!-- Route Header Card -->
+<section class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Express Route</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-base font-bold text-slate-900">Chennai</span>
+<span class="material-symbols-outlined text-slate-400 text-sm">east</span>
+<span class="text-base font-bold text-slate-900">Bangalore</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Departure</span>
+<span class="text-sm font-bold text-blue-700">09:00 AM</span>
+</div>
+</div>
+<!-- Clean Boarding Progress Line -->
+<div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5 font-semibold text-slate-700">
+<span class="material-symbols-outlined text-emerald-600 text-base">group</span>
+<span id="summary-text">14 of 22 Boarded</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[11px] font-semibold border border-amber-200/50" id="awaiting-pill">
+              8 Awaiting
+            </span>
+</div>
+<!-- Single progress bar -->
+<div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full transition-all duration-300" id="progress-bar" style="width: 63.6%;"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-slate-500 font-medium">
+<span>Coach B2 · RailCar #4</span>
+<span>64% Capacity</span>
+</div>
+</div>
+</section>
+<!-- Search & Tab Filter Controls -->
+<section class="sticky top-[105px] z-20 bg-[#f8fafc]/95 backdrop-blur-md pt-1 pb-2 flex flex-col gap-2.5">
+<!-- Minimal Search Bar -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">search</span>
+<input autocomplete="off" class="w-full h-11 pl-10 pr-9 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-sm" id="manifest-search" placeholder="Search passenger or booking ID..." type="text"/>
+<button aria-label="Clear search" class="hidden absolute right-3 text-slate-400 hover:text-slate-600 p-1" id="clear-search">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Clean Pill Filter Tabs -->
+<div class="flex items-center gap-1.5 p-1 bg-slate-200/70 rounded-xl" role="tablist">
+<button class="filter-tab flex-1 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1" data-filter="all" role="tab">
+<span>All</span>
+<span class="text-[11px] opacity-70">(22)</span>
+</button>
+<button class="filter-tab flex-1 py-1.5 rounded-lg text-xs font-semibold bg-white text-blue-700 shadow-sm transition-all flex items-center justify-center gap-1 active" data-filter="awaiting" role="tab">
+<span>Awaiting</span>
+<span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-full">8</span>
+</button>
+<button class="filter-tab flex-1 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1" data-filter="boarded" role="tab">
+<span>Boarded</span>
+<span class="text-[11px] opacity-70">(14)</span>
+</button>
+</div>
+</section>
+<!-- Streamlined Passenger Rows List -->
+<section class="flex flex-col gap-2.5" id="passenger-container">
+<!-- Passenger 1: Priya Sundaram -->
+<article class="passenger-card bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex flex-col gap-3 transition-colors" data-name="Priya Sundaram" data-ref="RB-20261101-0043" data-status="awaiting">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 font-bold text-sm flex items-center justify-center border border-blue-100 shrink-0">12A</span>
+<div class="flex flex-col min-w-0">
+<h2 class="text-sm font-semibold text-slate-900 truncate">Priya Sundaram</h2>
+<div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+<span class="font-mono text-[11px]">RB-20261101-0043</span>
+<span class="text-slate-300">•</span>
+<span>Window</span>
+</div>
+</div>
+</div>
+<button class="h-9 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all shrink-0" onclick="handleManualBoard(this, 'Priya Sundaram')">
+<span class="material-symbols-outlined text-[16px]">how_to_reg</span>
+<span>Manual Board</span>
+</button>
+</div>
+</article>
+<!-- Passenger 2: Karthik Raja -->
+<article class="passenger-card bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex flex-col gap-3 transition-colors" data-name="Karthik Raja" data-ref="RB-20261101-0045" data-status="awaiting">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 font-bold text-sm flex items-center justify-center border border-blue-100 shrink-0">15C</span>
+<div class="flex flex-col min-w-0">
+<h2 class="text-sm font-semibold text-slate-900 truncate">Karthik Raja</h2>
+<div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+<span class="font-mono text-[11px]">RB-20261101-0045</span>
+<span class="text-slate-300">•</span>
+<span>Aisle (2 Bags)</span>
+</div>
+</div>
+</div>
+<button class="h-9 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all shrink-0" onclick="handleManualBoard(this, 'Karthik Raja')">
+<span class="material-symbols-outlined text-[16px]">how_to_reg</span>
+<span>Manual Board</span>
+</button>
+</div>
+</article>
+<!-- Passenger 3: Sneha Patel -->
+<article class="passenger-card bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex flex-col gap-3 transition-colors" data-name="Sneha Patel" data-ref="RB-20261101-0048" data-status="awaiting">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 font-bold text-sm flex items-center justify-center border border-blue-100 shrink-0">08B</span>
+<div class="flex flex-col min-w-0">
+<h2 class="text-sm font-semibold text-slate-900 truncate">Sneha Patel</h2>
+<div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+<span class="font-mono text-[11px]">RB-20261101-0048</span>
+<span class="text-slate-300">•</span>
+<span class="text-amber-700 font-medium">Priority Aid</span>
+</div>
+</div>
+</div>
+<button class="h-9 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all shrink-0" onclick="handleManualBoard(this, 'Sneha Patel')">
+<span class="material-symbols-outlined text-[16px]">how_to_reg</span>
+<span>Manual Board</span>
+</button>
+</div>
+</article>
+<!-- Passenger 4: Arjun Sharma (Boarded) -->
+<article class="passenger-card bg-slate-50/80 rounded-xl p-3.5 border border-slate-200/80 flex flex-col gap-2 transition-colors" data-name="Arjun Sharma" data-ref="RB-20261101-0042" data-status="boarded">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm flex items-center justify-center border border-emerald-100 shrink-0">14B</span>
+<div class="flex flex-col min-w-0">
+<h2 class="text-sm font-semibold text-slate-800 truncate">Arjun Sharma</h2>
+<div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+<span class="font-mono text-[11px]">RB-20261101-0042</span>
+<span class="text-slate-300">•</span>
+<span class="text-emerald-700 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+                    08:52 AM
+                  </span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-md">Gate B-02</span>
+</div>
+</article>
+<!-- Passenger 5: Deepak Verma (Boarded) -->
+<article class="passenger-card bg-slate-50/80 rounded-xl p-3.5 border border-slate-200/80 flex flex-col gap-2 transition-colors" data-name="Deepak Verma" data-ref="RB-20261101-0039" data-status="boarded">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm flex items-center justify-center border border-emerald-100 shrink-0">07A</span>
+<div class="flex flex-col min-w-0">
+<h2 class="text-sm font-semibold text-slate-800 truncate">Deepak Verma</h2>
+<div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+<span class="font-mono text-[11px]">RB-20261101-0039</span>
+<span class="text-slate-300">•</span>
+<span class="text-amber-700 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] animate-pulse">sync_saved_locally</span>
+                    Queued locally
+                  </span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-md">Gate B-02</span>
+</div>
+</article>
+<!-- Passenger 6: Meera Nambiar (Boarded) -->
+<article class="passenger-card bg-slate-50/80 rounded-xl p-3.5 border border-slate-200/80 flex flex-col gap-2 transition-colors" data-name="Meera Nambiar" data-ref="RB-20261101-0038" data-status="boarded">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm flex items-center justify-center border border-emerald-100 shrink-0">03F</span>
+<div class="flex flex-col min-w-0">
+<h2 class="text-sm font-semibold text-slate-800 truncate">Meera Nambiar</h2>
+<div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+<span class="font-mono text-[11px]">RB-20261101-0038</span>
+<span class="text-slate-300">•</span>
+<span class="text-amber-700 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] animate-pulse">sync_saved_locally</span>
+                    Queued locally
+                  </span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-md">Gate B-02</span>
+</div>
+</article>
+<!-- Passenger 7: Rohan Gupta (Boarded) -->
+<article class="passenger-card bg-slate-50/80 rounded-xl p-3.5 border border-slate-200/80 flex flex-col gap-2 transition-colors" data-name="Rohan Gupta" data-ref="RB-20261101-0035" data-status="boarded">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm flex items-center justify-center border border-emerald-100 shrink-0">18D</span>
+<div class="flex flex-col min-w-0">
+<h2 class="text-sm font-semibold text-slate-800 truncate">Rohan Gupta</h2>
+<div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+<span class="font-mono text-[11px]">RB-20261101-0035</span>
+<span class="text-slate-300">•</span>
+<span class="text-emerald-700 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+                    08:41 AM
+                  </span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-md">Gate B-02</span>
+</div>
+</article>
+<!-- Empty State -->
+<div class="hidden flex-col items-center justify-center py-12 px-4 text-center bg-white border border-slate-200 rounded-xl mt-2" id="no-results">
+<div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+<span class="material-symbols-outlined text-[26px]">person_search</span>
+</div>
+<span class="text-sm font-semibold text-slate-800">No Passengers Found</span>
+<p class="text-xs text-slate-500 mt-1 max-w-xs">No matching names or booking references found in current filter.</p>
+</div>
+</section>
+<!-- Prominent Clean Floating Action Button for QR Scan -->
+<div class="fixed bottom-24 right-4 z-40">
+<a class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-lg shadow-blue-500/25 active:scale-95 transition-all" data-path="qr-scan" href="#">
+<span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+<span class="text-xs font-semibold tracking-wide">Quick Scan QR</span>
+</a>
+</div>
+<!-- Feedback Toast -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-full text-xs font-medium shadow-xl flex items-center gap-2 pointer-events-none transition-all duration-300 opacity-0 translate-y-3" id="toast">
+<span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+<span id="toast-message">Passenger boarded</span>
+</div>
+</div>
+</main>
+<!-- Clean Light Bottom Navigation -->
+<nav class="fixed bottom-0 w-full z-40 pb-safe bg-white/95 backdrop-blur-md border-t border-slate-200" data-active-classes="text-blue-700">
+<div class="flex items-center justify-around h-16 max-w-md mx-auto px-2">
+<a class="flex flex-col items-center justify-center min-w-[56px] text-slate-400 hover:text-slate-700 transition-colors" data-path="my-trips" href="#">
+<span class="material-symbols-outlined text-[22px]">directions_bus</span>
+<span class="text-[10px] font-medium mt-0.5">My Trips</span>
+</a>
+<a class="flex flex-col items-center justify-center min-w-[56px] text-slate-400 hover:text-slate-700 transition-colors" data-path="trip-overview" href="#">
+<span class="material-symbols-outlined text-[22px]">speed</span>
+<span class="text-[10px] font-medium mt-0.5">Overview</span>
+</a>
+<a class="flex flex-col items-center justify-center min-w-[56px] -mt-3" data-path="qr-scan" href="#">
+<div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/30 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[24px]">qr_code_scanner</span>
+</div>
+<span class="text-[10px] font-medium text-blue-700 mt-1">Scan</span>
+</a>
+<a aria-current="page" class="flex flex-col items-center justify-center min-w-[56px] text-blue-700 relative" data-path="manifest" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-[22px]">fact_check</span>
+<span class="absolute -top-1 -right-2 bg-emerald-600 text-white text-[9px] px-1 py-0.2 rounded-full font-bold leading-none">48</span>
+</div>
+<span class="text-[10px] font-semibold mt-0.5">Manifest</span>
+</a>
+</div>
+</nav>
+<script>
+    (function initManifestInteractions() {
+      const searchInput = document.getElementById('manifest-search');
+      const clearBtn = document.getElementById('clear-search');
+      const filterTabs = document.querySelectorAll('.filter-tab');
+      const cards = document.querySelectorAll('.passenger-card');
+      const noResults = document.getElementById('no-results');
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+
+      let activeFilter = 'awaiting';
+      let searchQuery = '';
+
+      function applyFilters() {
+        let visibleCount = 0;
+        const q = searchQuery.toLowerCase().trim();
+
+        cards.forEach(card => {
+          const status = card.dataset.status;
+          const name = (card.dataset.name || '').toLowerCase();
+          const ref = (card.dataset.ref || '').toLowerCase();
+
+          const matchesStatus = (activeFilter === 'all') || (status === activeFilter);
+          const matchesQuery = !q || name.includes(q) || ref.includes(q);
+
+          if (matchesStatus && matchesQuery) {
+            card.classList.remove('hidden');
+            visibleCount++;
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+
+        if (visibleCount === 0) {
+          noResults.classList.remove('hidden');
+          noResults.classList.add('flex');
+        } else {
+          noResults.classList.add('hidden');
+          noResults.classList.remove('flex');
+        }
+      }
+
+      filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          filterTabs.forEach(t => {
+            t.classList.remove('bg-white', 'text-blue-700', 'shadow-sm', 'active');
+            t.classList.add('text-slate-600');
+          });
+
+          tab.classList.add('bg-white', 'text-blue-700', 'shadow-sm', 'active');
+          tab.classList.remove('text-slate-600');
+
+          activeFilter = tab.dataset.filter;
+          applyFilters();
+        });
+      });
+
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        if (searchQuery.length > 0) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+        applyFilters();
+      });
+
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        clearBtn.classList.add('hidden');
+        searchInput.focus();
+        applyFilters();
+      });
+
+      window.handleManualBoard = function(btn, passengerName) {
+        const card = btn.closest('.passenger-card');
+        if (!card) return;
+
+        card.dataset.status = 'boarded';
+        card.classList.remove('bg-white');
+        card.classList.add('bg-slate-50/80');
+
+        const seatBox = card.querySelector('span.text-blue-700');
+        if (seatBox) {
+          seatBox.className = 'w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm flex items-center justify-center border border-emerald-100 shrink-0';
+        }
+
+        btn.outerHTML = `
+          <span class="text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-md">Gate B-02</span>
+        `;
+
+        showToast(`✓ ${passengerName} boarded manually`);
+
+        setTimeout(() => {
+          applyFilters();
+        }, 400);
+      };
+
+      function showToast(text) {
+        toastMessage.textContent = text;
+        toast.classList.remove('opacity-0', 'translate-y-3');
+        toast.classList.add('opacity-100', 'translate-y-0');
+
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-3');
+          toast.classList.remove('opacity-100', 'translate-y-0');
+        }, 2200);
+      }
+
+      applyFilters();
+    })();
+  </script>
+</body></html>
