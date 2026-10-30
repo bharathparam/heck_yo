@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Search, UserCheck, Check, RefreshCw, X, Users, Phone, Ticket } from 'lucide-react';
-import type { PassengerManifestItem } from '../types';
+import { Search, UserCheck, Check, RefreshCw, X, Users, Phone, Ticket, Clock } from 'lucide-react';
+import type { PassengerManifestItem, ScanRecord } from '../types';
 
 interface ManifestViewProps {
   manifest: PassengerManifestItem[];
+  scans: ScanRecord[];
   onManualBoard: (ticketId: string, ticketRef: string, passengerName: string) => void;
   onRefresh: () => void;
   isLoading: boolean;
@@ -11,15 +12,44 @@ interface ManifestViewProps {
 
 export const ManifestView: React.FC<ManifestViewProps> = ({
   manifest,
+  scans,
   onManualBoard,
   onRefresh,
   isLoading,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'boarded' | 'pending'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'provisional' | 'boarded'>('all');
+
+  // Compute item status by merging manifest and local scans queue
+  const manifestWithQueueStatus = useMemo(() => {
+    return manifest.map((item) => {
+      // Find latest scan record in local queue for this ticket
+      const localScan = scans.find(
+        (s) => s.ticket_id === item.ticket_id || s.ticket_reference === item.ticket_reference
+      );
+
+      let effectiveStatus: 'BOARDED' | 'PROVISIONAL' | 'PENDING' = 'PENDING';
+
+      if (item.status === 'BOARDED' && (!localScan || localScan.state === 'SERVER_VALIDATED')) {
+        effectiveStatus = 'BOARDED';
+      } else if (localScan?.state === 'LOCAL_ACCEPTED' || localScan?.state === 'SYNCING') {
+        effectiveStatus = 'PROVISIONAL';
+      } else if (localScan?.state === 'SERVER_VALIDATED') {
+        effectiveStatus = 'BOARDED';
+      } else if (item.status === 'BOARDED') {
+        effectiveStatus = 'BOARDED';
+      }
+
+      return {
+        ...item,
+        effectiveStatus,
+        localScan,
+      };
+    });
+  }, [manifest, scans]);
 
   const filteredItems = useMemo(() => {
-    return manifest.filter((item) => {
+    return manifestWithQueueStatus.filter((item) => {
       const matchSearch =
         item.passenger_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.ticket_reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -27,14 +57,16 @@ export const ManifestView: React.FC<ManifestViewProps> = ({
 
       if (!matchSearch) return false;
 
-      if (filter === 'boarded') return item.status === 'BOARDED';
-      if (filter === 'pending') return item.status !== 'BOARDED';
+      if (filter === 'boarded') return item.effectiveStatus === 'BOARDED';
+      if (filter === 'provisional') return item.effectiveStatus === 'PROVISIONAL';
+      if (filter === 'pending') return item.effectiveStatus === 'PENDING';
       return true;
     });
-  }, [manifest, searchTerm, filter]);
+  }, [manifestWithQueueStatus, searchTerm, filter]);
 
-  const boardedCount = manifest.filter((m) => m.status === 'BOARDED').length;
-  const pendingCount = manifest.length - boardedCount;
+  const serverBoardedCount = manifestWithQueueStatus.filter((m) => m.effectiveStatus === 'BOARDED').length;
+  const provisionalCount = manifestWithQueueStatus.filter((m) => m.effectiveStatus === 'PROVISIONAL').length;
+  const pendingCount = manifestWithQueueStatus.filter((m) => m.effectiveStatus === 'PENDING').length;
 
   return (
     <div className="bg-slate-900 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5">
@@ -83,11 +115,11 @@ export const ManifestView: React.FC<ManifestViewProps> = ({
         )}
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-1.5 p-1 bg-slate-950/80 rounded-xl border border-slate-800 text-xs font-semibold">
+      {/* Filter Tabs with Distinct Status Badges */}
+      <div className="grid grid-cols-4 gap-1 p-1 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] font-semibold">
         <button
           onClick={() => setFilter('all')}
-          className={`flex-1 py-2 rounded-lg transition-all text-center ${
+          className={`py-2 px-1 rounded-lg transition-all text-center truncate ${
             filter === 'all'
               ? 'bg-slate-800 text-white shadow-sm'
               : 'text-slate-400 hover:text-slate-200'
@@ -95,30 +127,46 @@ export const ManifestView: React.FC<ManifestViewProps> = ({
         >
           All ({manifest.length})
         </button>
+
         <button
           onClick={() => setFilter('pending')}
-          className={`flex-1 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
+          className={`py-2 px-1 rounded-lg transition-all text-center flex items-center justify-center gap-1 truncate ${
             filter === 'pending'
-              ? 'bg-amber-950/80 text-amber-300 border border-amber-800/60 shadow-sm'
+              ? 'bg-slate-800 text-slate-200 border border-slate-700 shadow-sm'
               : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           <span>Pending</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300">
+          <span className="text-[10px] px-1 rounded bg-slate-700/80 text-slate-300">
             {pendingCount}
           </span>
         </button>
+
         <button
-          onClick={() => setFilter('boarded')}
-          className={`flex-1 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
-            filter === 'boarded'
-              ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 shadow-sm'
-              : 'text-slate-400 hover:text-slate-200'
+          onClick={() => setFilter('provisional')}
+          className={`py-2 px-1 rounded-lg transition-all text-center flex items-center justify-center gap-1 truncate ${
+            filter === 'provisional'
+              ? 'bg-amber-950/80 text-amber-300 border border-amber-800/80 shadow-sm'
+              : 'text-amber-400/80 hover:text-amber-300'
           }`}
         >
-          <span>Boarded</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300">
-            {boardedCount}
+          <span>Provisional</span>
+          <span className="text-[10px] px-1 rounded bg-amber-500/20 text-amber-300">
+            {provisionalCount}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setFilter('boarded')}
+          className={`py-2 px-1 rounded-lg transition-all text-center flex items-center justify-center gap-1 truncate ${
+            filter === 'boarded'
+              ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 shadow-sm'
+              : 'text-emerald-400/80 hover:text-emerald-300'
+          }`}
+        >
+          <span>Validated</span>
+          <span className="text-[10px] px-1 rounded bg-emerald-500/20 text-emerald-300">
+            {serverBoardedCount}
           </span>
         </button>
       </div>
@@ -132,7 +180,8 @@ export const ManifestView: React.FC<ManifestViewProps> = ({
           </div>
         ) : (
           filteredItems.map((item) => {
-            const isBoarded = item.status === 'BOARDED';
+            const isBoarded = item.effectiveStatus === 'BOARDED';
+            const isProvisional = item.effectiveStatus === 'PROVISIONAL';
 
             return (
               <div
@@ -140,6 +189,8 @@ export const ManifestView: React.FC<ManifestViewProps> = ({
                 className={`p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${
                   isBoarded
                     ? 'bg-emerald-950/15 border-emerald-900/40'
+                    : isProvisional
+                    ? 'bg-amber-950/20 border-amber-600/40'
                     : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'
                 }`}
               >
@@ -170,7 +221,12 @@ export const ManifestView: React.FC<ManifestViewProps> = ({
                   {isBoarded ? (
                     <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-1.5 rounded-lg">
                       <Check className="w-3.5 h-3.5" />
-                      <span>Boarded</span>
+                      <span>Verified Boarded</span>
+                    </div>
+                  ) : isProvisional ? (
+                    <div className="flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-amber-950/80 border border-amber-600/70 px-2.5 py-1.5 rounded-lg shadow-sm">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Provisional</span>
                     </div>
                   ) : (
                     <button

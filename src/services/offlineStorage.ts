@@ -1,3 +1,7 @@
+/**
+ * @deprecated Superceded by IndexedDB storage in `services/db.ts`
+ * Kept for backwards compatibility and legacy migration.
+ */
 import type { OfflineBoardingItem } from '../types';
 
 const STORAGE_KEY_PREFIX = 'railbus_offline_boardings_';
@@ -14,7 +18,6 @@ export const getOfflineQueue = (tripId: string): OfflineBoardingItem[] => {
 export const addToOfflineQueue = (tripId: string, item: OfflineBoardingItem): void => {
   try {
     const current = getOfflineQueue(tripId);
-    // Deduplicate if already queued
     if (!current.some((x) => x.ticket_id === item.ticket_id)) {
       current.push(item);
       localStorage.setItem(`${STORAGE_KEY_PREFIX}${tripId}`, JSON.stringify(current));

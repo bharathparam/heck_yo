@@ -6,25 +6,70 @@ import type {
   OfflineSyncBatchResponse,
   ConductorUser,
 } from '../types';
+import { saveCachedManifest, saveCachedTrips, getCachedTrips, getCachedManifest } from './db';
 
 const API_BASE = '/api/v1';
 
+export class TokenExpiredError extends Error {
+  constructor(message = 'Session token has expired. Re-authentication required.') {
+    super(message);
+    this.name = 'TokenExpiredError';
+  }
+}
+
+export class ApiError extends Error {
+  statusCode: number;
+  errorCode?: string;
+
+  constructor(message: string, statusCode: number, errorCode?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.statusCode = statusCode;
+    this.errorCode = errorCode;
+  }
+}
+
+// Token expired event subscribers
+type TokenExpiredListener = () => void;
+const tokenExpiredListeners: Set<TokenExpiredListener> = new Set();
+
+export const onTokenExpired = (listener: TokenExpiredListener): (() => void) => {
+  tokenExpiredListeners.add(listener);
+  return () => {
+    tokenExpiredListeners.delete(listener);
+  };
+};
+
+export const notifyTokenExpired = (): void => {
+  tokenExpiredListeners.forEach((fn) => {
+    try {
+      fn();
+    } catch (e) {
+      console.error('Error in token expired listener', e);
+    }
+  });
+};
+
 export const getStoredToken = (): string | null => {
-  return localStorage.getItem('railbus_conductor_token');
+  return typeof localStorage !== 'undefined' ? localStorage.getItem('railbus_conductor_token') : null;
 };
 
 export const setStoredToken = (token: string): void => {
-  localStorage.setItem('railbus_conductor_token', token);
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('railbus_conductor_token', token);
+  }
 };
 
 export const clearStoredAuth = (): void => {
-  localStorage.removeItem('railbus_conductor_token');
-  localStorage.removeItem('railbus_conductor_user');
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('railbus_conductor_token');
+    localStorage.removeItem('railbus_conductor_user');
+  }
 };
 
 export const getStoredUser = (): ConductorUser | null => {
   try {
-    const raw = localStorage.getItem('railbus_conductor_user');
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('railbus_conductor_user') : null;
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -32,10 +77,12 @@ export const getStoredUser = (): ConductorUser | null => {
 };
 
 export const setStoredUser = (user: ConductorUser): void => {
-  localStorage.setItem('railbus_conductor_user', JSON.stringify(user));
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('railbus_conductor_user', JSON.stringify(user));
+  }
 };
 
-async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getStoredToken();
   const headers = new Headers(options.headers || {});
 
@@ -47,27 +94,47 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch (netErr: unknown) {
+    const errMsg = netErr instanceof Error ? netErr.message : 'Network unreachable';
+    throw new ApiError(errMsg, 0, 'NETWORK_ERROR');
+  }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      notifyTokenExpired();
+      throw new TokenExpiredError();
+    }
+
     let errorDetail = 'API request failed';
+    let errorCode: string | undefined;
     try {
       const errJson = await response.json();
-      errorDetail = errJson.detail?.error || errJson.detail || errJson.message || JSON.stringify(errJson);
+      errorDetail =
+        errJson.detail?.error ||
+        errJson.detail ||
+        errJson.message ||
+        (typeof errJson === 'string' ? errJson : JSON.stringify(errJson));
+      errorCode = errJson.error_code || errJson.detail?.error_code;
     } catch {
       errorDetail = `HTTP ${response.status} ${response.statusText}`;
     }
-    throw new Error(errorDetail);
+    throw new ApiError(errorDetail, response.status, errorCode);
   }
 
   return response.json();
 }
 
 // Authentication
-export const apiLogin = async (email: string, password: string): Promise<{ token: string; user: ConductorUser }> => {
+export const apiLogin = async (
+  email: string,
+  password: string
+): Promise<{ token: string; user: ConductorUser }> => {
   const data = await apiRequest<{
     access_token: string;
     user_id: string;
@@ -92,24 +159,62 @@ export const apiLogin = async (email: string, password: string): Promise<{ token
   return { token: data.access_token, user };
 };
 
-// Trips
+// Trips (with offline fallback cache)
 export const apiGetAssignedTrips = async (): Promise<ConductorTripSummary[]> => {
-  return apiRequest<ConductorTripSummary[]>('/conductor/trips');
+  try {
+    const data = await apiRequest<ConductorTripSummary[]>('/conductor/trips');
+    // Cache for offline usage
+    await saveCachedTrips(data);
+    return data;
+  } catch (err) {
+    if (err instanceof ApiError && err.statusCode === 0) {
+      // Offline fallback: load from IndexedDB
+      const cached = await getCachedTrips();
+      if (cached && cached.length > 0) {
+        return cached;
+      }
+    }
+    throw err;
+  }
 };
 
-// Manifest
+// Manifest (caches to IndexedDB on online fetch)
 export const apiGetManifest = async (tripId: string): Promise<ManifestResponse> => {
-  return apiRequest<ManifestResponse>(`/conductor/trips/${tripId}/manifest`);
+  try {
+    const data = await apiRequest<ManifestResponse>(`/conductor/trips/${tripId}/manifest`);
+    // Cache to IndexedDB when fetched online
+    await saveCachedManifest(data);
+    return data;
+  } catch (err) {
+    if (err instanceof ApiError && err.statusCode === 0) {
+      // Offline fallback: read cached manifest from IndexedDB
+      const cached = await getCachedManifest(tripId);
+      if (cached) {
+        return {
+          trip_id: cached.trip_id,
+          route_name: cached.route_name,
+          bus_registration: cached.bus_registration,
+          status: cached.status,
+          total_passengers: cached.total_passengers,
+          boarded_count: cached.boarded_count,
+          manifest: cached.manifest,
+        };
+      }
+    }
+    throw err;
+  }
 };
 
 // Open Boarding
-export const apiOpenBoarding = async (tripId: string): Promise<{ trip_id: string; status: string; message: string }> => {
+export const apiOpenBoarding = async (
+  tripId: string
+): Promise<{ trip_id: string; status: string; message: string }> => {
   return apiRequest(`/conductor/trips/${tripId}/boarding/open`, {
     method: 'POST',
   });
 };
 
-// Board Ticket via QR scan
+// Board Ticket via QR scan (Online direct board)
 export const apiBoardTicket = async (
   tripId: string,
   qrCode: string,
@@ -140,14 +245,18 @@ export const apiSyncOfflineBatch = async (
 };
 
 // Depart Trip
-export const apiDepartTrip = async (tripId: string): Promise<{ status: string; message: string }> => {
+export const apiDepartTrip = async (
+  tripId: string
+): Promise<{ status: string; message: string }> => {
   return apiRequest(`/conductor/trips/${tripId}/depart`, {
     method: 'POST',
   });
 };
 
 // Complete Trip
-export const apiCompleteTrip = async (tripId: string): Promise<{ status: string; message: string }> => {
+export const apiCompleteTrip = async (
+  tripId: string
+): Promise<{ status: string; message: string }> => {
   return apiRequest(`/conductor/trips/${tripId}/complete`, {
     method: 'POST',
   });

@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { X, Camera, RefreshCw, KeyRound, AlertTriangle } from 'lucide-react';
+import { X, Camera, RefreshCw, KeyRound, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 interface QRScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onScanSuccess: (decodedText: string) => void;
   isProcessing: boolean;
+  isOnline: boolean;
 }
 
 export const QRScannerModal: React.FC<QRScannerModalProps> = ({
@@ -14,7 +15,9 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
   onClose,
   onScanSuccess,
   isProcessing,
+  isOnline,
 }) => {
+  const [cameraPermissionDenied, setCameraPermissionDenied] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [manualCode, setManualCode] = useState<string>('');
   const [showManualInput, setShowManualInput] = useState<boolean>(false);
@@ -23,8 +26,22 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const readerElementId = 'qr-reader-container';
 
+  const onScanSuccessRef = useRef(onScanSuccess);
   useEffect(() => {
-    if (!isOpen || showManualInput) {
+    onScanSuccessRef.current = onScanSuccess;
+  }, [onScanSuccess]);
+
+  const cleanupScanner = React.useCallback(() => {
+    if (scannerRef.current && scannerRef.current.isScanning) {
+      scannerRef.current
+        .stop()
+        .then(() => scannerRef.current?.clear())
+        .catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen || showManualInput || cameraPermissionDenied) {
       cleanupScanner();
       return;
     }
@@ -34,6 +51,8 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
     const startScanner = async () => {
       try {
         setCameraError(null);
+        setCameraPermissionDenied(false);
+
         const html5QrCode = new Html5Qrcode(readerElementId, {
           formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
           verbose: false,
@@ -55,7 +74,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
           },
           (decodedText) => {
             if (isMounted) {
-              onScanSuccess(decodedText);
+              onScanSuccessRef.current(decodedText);
             }
           },
           () => {
@@ -65,11 +84,21 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
       } catch (err: unknown) {
         if (!isMounted) return;
         const msg = err instanceof Error ? err.message : 'Unable to access device camera';
-        setCameraError(
-          msg.includes('NotAllowedError') || msg.includes('Permission')
-            ? 'Camera access denied. Please grant permission in browser settings or use manual entry.'
-            : 'Could not open camera stream. Switching to manual ticket entry.'
-        );
+        const isPermission =
+          msg.includes('NotAllowedError') ||
+          msg.includes('Permission') ||
+          msg.toLowerCase().includes('denied');
+
+        if (isPermission) {
+          setCameraPermissionDenied(true);
+          setShowManualInput(true); // Automatically switch to manual entry fallback!
+          setCameraError(
+            'Camera permission was denied. Use manual ticket entry below, or enable camera access in your browser / Android site settings.'
+          );
+        } else {
+          setCameraError('Could not initialize camera stream. Switching to manual ticket entry.');
+          setShowManualInput(true);
+        }
       }
     };
 
@@ -82,16 +111,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
       clearTimeout(timer);
       cleanupScanner();
     };
-  }, [isOpen, facingMode, showManualInput]);
-
-  const cleanupScanner = () => {
-    if (scannerRef.current && scannerRef.current.isScanning) {
-      scannerRef.current
-        .stop()
-        .then(() => scannerRef.current?.clear())
-        .catch(() => {});
-    }
-  };
+  }, [isOpen, facingMode, showManualInput, cameraPermissionDenied, cleanupScanner]);
 
   const toggleCameraFacing = () => {
     cleanupScanner();
@@ -109,7 +129,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
       <div className="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[92vh] pb-safe">
         {/* Mobile Drag Indicator Bar */}
         <div className="w-12 h-1.5 bg-slate-700/60 rounded-full mx-auto mt-3 sm:hidden shrink-0"></div>
@@ -121,7 +141,14 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
               <Camera className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white leading-tight">Boarding Pass Scanner</h3>
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-sm font-bold text-white leading-tight">Boarding Pass Scanner</h3>
+                {!isOnline && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    Offline
+                  </span>
+                )}
+              </div>
               <p className="text-[11px] text-slate-400">Position passenger QR inside reticle</p>
             </div>
           </div>
@@ -135,18 +162,32 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
         </div>
 
         {/* Camera / Manual Viewport Area */}
-        <div className="relative bg-black flex items-center justify-center overflow-hidden min-h-[260px] sm:min-h-[300px]">
+        <div className="relative bg-black flex items-center justify-center overflow-hidden min-h-[280px] sm:min-h-[320px]">
           {showManualInput ? (
-            <div className="p-6 w-full max-w-xs mx-auto text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-slate-800 text-sky-400 flex items-center justify-center mx-auto">
-                <KeyRound className="w-6 h-6" />
-              </div>
+            <div className="p-6 w-full max-w-sm mx-auto text-center space-y-4">
+              {cameraPermissionDenied ? (
+                <div className="bg-amber-950/40 border border-amber-800/80 rounded-2xl p-3 text-left space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+                    <ShieldAlert className="w-4 h-4 shrink-0" />
+                    <span>Camera Permission Blocked</span>
+                  </div>
+                  <p className="text-[11px] text-amber-200/90 leading-relaxed">
+                    Camera was blocked in browser settings. Enter the ticket reference code manually below. To re-enable, tap the lock/tune icon in the URL bar and allow Camera.
+                  </p>
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-slate-800 text-sky-400 flex items-center justify-center mx-auto">
+                  <KeyRound className="w-6 h-6" />
+                </div>
+              )}
+
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-white">Manual Reference Entry</h4>
+                <h4 className="text-sm font-bold text-white">Manual Ticket Entry Fallback</h4>
                 <p className="text-xs text-slate-400">
-                  Enter Ticket Reference (e.g. TKT-52C1B818) or Ticket UUID
+                  Enter Ticket Reference (e.g. <code>TKT-52C1B818</code>) or Ticket UUID
                 </p>
               </div>
+
               <form onSubmit={handleManualSubmit} className="space-y-3">
                 <input
                   type="text"
@@ -155,14 +196,21 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
                   placeholder="e.g. TKT-52C1B818"
                   autoFocus
                   required
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-center font-mono text-sm text-sky-300 placeholder-slate-600 focus:outline-none focus:border-sky-500"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center font-mono text-sm text-sky-300 placeholder-slate-600 focus:outline-none focus:border-sky-500 uppercase"
                 />
                 <button
                   type="submit"
                   disabled={isProcessing || !manualCode.trim()}
-                  className="w-full tap-target bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-xs active-press transition-all"
+                  className="w-full tap-target bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl text-xs active-press transition-all flex items-center justify-center gap-2 shadow-lg shadow-sky-950/60"
                 >
-                  {isProcessing ? 'Verifying...' : 'Confirm Ticket Boarding'}
+                  {isProcessing ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Validating Ticket...</span>
+                    </>
+                  ) : (
+                    <span>Validate Ticket</span>
+                  )}
                 </button>
               </form>
             </div>
@@ -185,7 +233,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
                 </div>
               </div>
 
-              {cameraError && (
+              {cameraError && !cameraPermissionDenied && (
                 <div className="absolute inset-4 bg-slate-950/95 border border-amber-800/80 p-5 rounded-2xl text-center space-y-3 z-10 flex flex-col justify-center">
                   <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto" />
                   <p className="text-xs text-amber-200 leading-relaxed">{cameraError}</p>
@@ -210,16 +258,18 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
 
         {/* Modal Bottom Controls */}
         <div className="p-3.5 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => setShowManualInput(!showManualInput)}
-            className="tap-target flex-1 px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-750 border border-slate-700/80 rounded-xl flex items-center justify-center gap-1.5 active-press transition-colors"
-          >
-            <KeyRound className="w-4 h-4 text-sky-400" />
-            <span>{showManualInput ? 'Open Camera' : 'Manual Entry'}</span>
-          </button>
+          {!cameraPermissionDenied && (
+            <button
+              type="button"
+              onClick={() => setShowManualInput(!showManualInput)}
+              className="tap-target flex-1 px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-750 border border-slate-700/80 rounded-xl flex items-center justify-center gap-1.5 active-press transition-colors"
+            >
+              <KeyRound className="w-4 h-4 text-sky-400" />
+              <span>{showManualInput ? 'Open Camera' : 'Manual Entry'}</span>
+            </button>
+          )}
 
-          {!showManualInput && (
+          {!showManualInput && !cameraPermissionDenied && (
             <button
               type="button"
               onClick={toggleCameraFacing}
